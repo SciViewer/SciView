@@ -1,0 +1,128 @@
+#!/bin/bash
+
+function init() {
+    export $(cat env)
+    echo "The env file: is loaded"
+    if [ "$CONN" == SciMagDB ]; then
+        echo "voro" | sudo -S -k mount -t drvfs '\\SciMagDB\SciMagDir' /mnt/share
+        echo
+        echo "The SciMagDB is mounted"
+    elif [ "$CONN" == ScidbBackup ]; then
+        echo "voro" | sudo -S -k mount -t drvfs '\\SciMagBackup\Backup\Backup' /mnt/share
+        echo
+        echo "The SciMagBackup is mounted"
+    fi
+    echo "---------------------------------------------------------------"
+    echo "The following dir are at the mount: $(ls ~/../../mnt/share/) "
+    echo "---------------------------------------------------------------"
+    echo "The nas home dir is mountet at: /mnt/share"
+    echo "The data path is at: "$DATA_PATH""
+    echo "The torrent file path is at: "$TORRENT_PATH""
+    echo "---------------------------------------------------------------"
+}
+
+function torrentdl() {
+    init
+    echo "Torrent files are stored under: $TORRENT_PATH"
+    echo "Current function downloads from 000 to 851"
+    for y in $(seq -w 852 875); do
+	    wget -P $TORRENT_PATH http://libgen.rs/scimag/repository_torrent/sm_${y}00000-${y}99999.torrent
+	    sleep $(($RANDOM % 3 + 1))
+    done
+}
+
+function dlunzip() {
+    init
+    for y in $(seq -w $1 $2); do
+        echo "Data location is at: "$RAW_DATA_PATH""
+        echo "Unzip location is at: "$DATA_PATH""
+        echo "unziping file ${y}00000"
+        unzip $DATA_PATH/${y}00000/"*.zip" -d $DATA_PATH/${y}00000/
+        # unzip $RAW_DATA_PATH/${y}00000/"*.zip" -d $DATA_PATH/${y}00000/
+    done
+}
+
+function pdf2text() {
+    init
+    for y in $(seq -w $1 $2); do  
+	    for f in $DATA_PATH/${y}00000/10.*/*.pdf; do  
+		    pdftotext -enc UTF-8 $f 
+	    done  
+    done
+
+    # ./scidb: line 35: /usr/bin/find: Argument list too long
+    # for y in $(seq -w $1 $2); do  
+    #     find $DATA_PATH/${y}00000/**/*.pdf | parallel --jobs 0 pdftotext -enc UTF-8 
+    # done
+}
+
+function overview(){
+    init
+    for y in $(seq -w $1 $2 $3); do
+	    echo "Directory: "$y "PDF count: " $(find $DATA_PATH/${y}00000/ -name "*.pdf" | wc -l) "Text count: " $(find $DATA_PATH/${y}00000/ -name "*.txt" | wc -l)
+    done
+}
+
+
+function rmpdf(){
+    init
+    for y in $(seq -w $1 $2); do
+        find $DATA_PATH/${y}00000/ -name "*.pdf" | xargs rm
+    done
+}
+
+function rmzip(){
+    init
+    for y in $(seq -w $1 $2); do
+        rm $DATA_PATH/${y}00000/*.zip
+        echo "Remove files then from the recycle bin"
+    done
+}
+
+function help() {
+echo
+echo
+echo "task commmands:"
+echo "(task) command <argument>     description"
+echo "---------------------------------------------------------------------------------------------"
+echo "torrentdl                     Downloads torrent files from scimag"
+echo "dlunzip <001> <004>           unzips files in a range of directories (Activate root first!!!)"
+echo "pdf2text <001> <004>          Uses pdftotext from popler utilities to transform pdf files into text files"
+echo "rmpdf  <001> <004>            Removes unzipped pdf files (usually applied after transformation to text)"
+echo 
+echo "Helping commands:"
+echo "command                       description"
+echo "--------------------------------------------"
+echo "dos2unix                      Convert dos files into unix files. Apply if a problem comes up"
+echo "init                          Loads the env paths and creates the mount"
+echo "overview <001> <1> <004>      Returns pdf and text file count for the given directory range"
+echo 
+}
+
+# Switch case for script parameter 1
+case "$1" in
+    init)
+        init
+        ;;
+    torrentdl)
+        torrentdl
+        ;;
+    dlunzip)
+        dlunzip $2 $3
+        ;;
+    pdf2text)
+        pdf2text $2 $3
+        ;;
+    overview)
+        overview $2 $3 $4
+        ;;
+    rmpdf)
+        rmpdf $2 $3
+        ;;
+    rmzip)
+        rmzip $2 $3
+        ;;
+    *)
+        help help
+        exit 1
+esac
