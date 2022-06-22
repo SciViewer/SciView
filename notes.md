@@ -16,8 +16,26 @@ gunzip -c unpaywall_snapshot_2021-07-02T151134.jsonl.gz | split -l 10000000 - un
 
 split -l 10000000 unpaywall_snapshot_2021-07-02T151134.jsonl unpay_2021_07_split_
 
+gunzip -c unpaywall_snapshot_2021-07-02T151134.jsonl.gz | split -l 10000000 - unpaywall_snapshot_2021-07-02T151134.jsonl.gz.10Msplit
 
 ssh fishsalat@192.168.0.18 -p22
 cd volume1/SciMagDir/Reference_Databases/unpaywall/
-gunzip -c unpaywall_snapshot_2021-07-02T151134.jsonl.gz | split -l 10000000 - unpaywall_snapshot_2021-07-02T151134.jsonl.gz.10Msplit
 split -l 1000000 unpaywall_snapshot_2021-07-02T151134.jsonl
+
+# Unziped the paywall file on the synology, then used the split command from wsl
+split -l 1000000 unpaywall_snapshot_2021-07-02T151134.jsonl
+
+# Conda
+Conda env can be activated through powershell and thenpython can be used
+
+# WSL
+Can be used vor the scidb commands
+
+# Packages to insallt
+### Through anaconda navigator:
+gensim
+nltk
+pandas
+
+### Through conda terminal:
+pip install langdetect

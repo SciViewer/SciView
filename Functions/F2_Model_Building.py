@@ -2,7 +2,7 @@ import memory_profiler as mem_profile
 
 
 def path_creator(pathType, ArgumentList):
-    if pathType=="log" or pathType=="phraseModel" or pathType=="dictionary" or pathType=="ldaModel":
+    if pathType=="log"or pathType=="metaSample" or pathType=="phraseModel" or pathType=="dictionary" or pathType=="ldaModel":
         return (ArgumentList[0] + str(ArgumentList[1]).zfill(3) + "_" + str(ArgumentList[2]).zfill(3) + ArgumentList[3])
     
     elif pathType=="meta":
@@ -79,4 +79,11 @@ def log_printer(logName, ArgumentList):
 
     else:
         print(ArgumentList[0], " Argument is not defined")
-       
+
+
+# Create the streaming class
+class MyCorpus:
+    def __iter__(self):
+        for line in open(CorpusStreamPath, encoding="utf-8"):
+            # assume there's one document per line, tokens separated by whitespace
+            yield line.lower().split()

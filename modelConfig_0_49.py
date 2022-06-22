@@ -16,6 +16,7 @@ FreezedPhrasesLog_Suffix="_FreezedBigramLog.txt"
 
 # Filtered meta data
 MetaDataFiltered_Suffix="_MetaDataFiltered.pkl"
+MetaDataSample_Suffix="_MetaDataSample.pkl"
 
 # Dictionary
 Dictionary_Suffix="_Dictionary"

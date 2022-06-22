@@ -2,27 +2,8 @@
 from Functions.F1_Subsets_and_PreProcessing import Preprocessed_Dict_and_Metadata, Dict_Loader, Chunks
 import pickle
 import pandas as pd
-# import glob
-# from urllib.parse import unquote
-# import random
-# import nltk
-# import re
-# import string
-# import gensim
-# from nltk.tokenize import word_tokenize, sent_tokenize
-# from nltk.corpus import stopwords
-# from nltk.stem import PorterStemmer # or LancasterStemmer, RegexpStemmer, SnowballStemmer
-# from nltk.stem import WordNetLemmatizer 
-# nltk.download('punkt')
-# nltk.download('stopwords')
-# stemmer = PorterStemmer()
-# stop_words = stopwords.words('english') # or any other list of your choice
-# lemmatizer = WordNetLemmatizer()
-# pip install langdetect
-# from langdetect import detect_langs
-# import time
 import multiprocessing as mp
-# from itertools import islice
+import gc
 
 #----------------------------------------#
 # If the conda environment does not get correctly activated (e.g. import gensim is not working)
@@ -40,8 +21,8 @@ MetaData_Suffix="_MetaData.pkl"
 encodeError_Suffix="_errEnc.pkl"
 
 # Set the dirs to save doi and paths
-StartDir=42
-EndDir=49
+StartDir=135
+EndDir=149
 
 #----------------------------------------#
 
@@ -103,8 +84,7 @@ for dirNum in range(StartDir,EndDir+1):
     # close file
     a.close()
 
-    #Try delete large dataframe (Prevent memory loss error)
-    del(FtPr)
+
 
     # Store the returned elements
     # create a binary pickle file 
@@ -116,5 +96,10 @@ for dirNum in range(StartDir,EndDir+1):
 
     # Save dataframe of metaData
     metaData.to_pickle(metaDataName)
+
+    # #Try delete large dataframe (Prevent memory loss error)
+    del(FtPr)
+    del(metaData)
+    gc.collect()
 
     print("saved all of the files")

@@ -1,7 +1,7 @@
 import glob
 from urllib.parse import unquote
 import random
-# import nltk
+import nltk
 # import re
 # import string
 import gensim
@@ -9,8 +9,8 @@ import gensim
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer # or LancasterStemmer, RegexpStemmer, SnowballStemmer
 from nltk.stem import WordNetLemmatizer 
-# nltk.download('punkt')
-# nltk.download('stopwords')
+nltk.download('punkt')
+nltk.download('stopwords')
 stemmer = PorterStemmer()
 stop_words = stopwords.words('english') # or any other list of your choice
 lemmatizer = WordNetLemmatizer()

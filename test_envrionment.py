@@ -8,6 +8,8 @@ import unidecode
 
 ### os utility
 import os
+
+from Functions.F2_Model_Building import MyCorpus
 os.listdir("Y:\\data\\00000000")
 # Limited by missing wildcards in path
 
@@ -80,8 +82,15 @@ with open(val, "r", encoding="utf8") as f:
     len(contents)
     print(contents[0:100])
 
+
+
+
+
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 # Multicore processing and paralleization
-#-------------------------------------------#
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 
 # Load packages
 from Functions.F1_Subsets_and_PreProcessing import DOI_Path_Dictionary, Random_DOI_Path_Pair, Preprocess_Token_List
@@ -206,9 +215,11 @@ len(Return[2][1])
 len(Return[3][0])
 len(Return[3][1])
 
-
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 # Multicore processing and paralleization 2
-#-------------------------------------------#
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 
 # Load packages
 from Functions.F1_Subsets_and_PreProcessing import DOI_Path_Dictionary, Random_DOI_Path_Pair, Preprocess_Token_List
@@ -321,9 +332,11 @@ for dirNum in range(StartDir,EndDir+1):
 
 
 
-
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 # Meta Data of preprocessing
-#-------------------------------------------#
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 # Load packages
 # from Functions.F1_Subsets_and_PreProcessing import DOI_Path_Dictionary, 
 # Random_DOI_Path_Pair, 
@@ -403,9 +416,11 @@ metaData['Token Amount'][metaData['Token Amount']>50]
 
 
 
-
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 # Test log functions
-#-------------------------------------------------------
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 # Load packages
 # from Functions.F1_Subsets_and_PreProcessing import DOI_Path_Dictionary, Random_DOI_Path_Pair #, Preprocess_Token_List
 from Functions.F1_Subsets_and_PreProcessing import  Dict_Loader #, Preprocessed_Dict_and_Metadata, Chunks
@@ -587,11 +602,22 @@ log_printer(path_creator("log",[Model_Path, StartDir, EndDir, FreezedPhrasesLog_
 
 
 
-
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 # If conda is not activated, invoke python then hit ctrl+Z then type conda activate to activate conda
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 
+
+
+
+
+
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 # Try applying generators for data streaming
-#-------------------------------------------------------
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 # Load packages
 from Functions.F1_Subsets_and_PreProcessing import Dict_Loader
 from Functions.F2_Model_Building import path_creator, log_printer
@@ -660,7 +686,6 @@ for doc in corpus:
 
 
 
-
 # Load Corpus into memory
 "{} Mb".format(mem_profile.memory_usage())
 # Initiate LDA Model
@@ -687,9 +712,11 @@ ldaModel.update(corpusStream(IntermediateData_Path, dirNum, StartDir, EndDir, Bo
 
 
 
-
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 # js_PCoA
-#-------------------------------------------------------
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 from scipy.spatial.distance import pdist, squareform
 from scipy.stats import entropy
 import gensim
@@ -791,9 +818,11 @@ def _pcoa(pair_dists, n_components=2):
 
 
 
-
- # Read json file for iterative search
-#-------------------------------------------------------
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# Read json file for iterative search
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 
 savePath="Y:\\Reference_Databases\\unpaywall\\"
 import json_lines
@@ -854,53 +883,78 @@ with json_lines.open('Y:\\Reference_Databases\\unpaywall\\unpaywall_snapshot_202
 ### Processing time:  (1'000'000 entries)
 
 
+
+
+
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
  # Read splitted json file for iterative search
-#-------------------------------------------------------
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 
 import jsonlines
 import time
 import pandas as pd
+import os
+import regex as re
+
+
+
+
 # Write and load json file, check time performance
 # startEntries=int(39e6) # Define from were the processing starts (the next set of processed entries will be saved)
 # amountofEntries=int(6e7) # How many lines should be processed in total
 logEntries=int(1e5) # Intervall of loging
-fileName="xaa"
+# fileName="xaa"
 path='Y:\\Reference_Databases\\unpaywall\\'
-filepath= path+ fileName
 # saveEntries=int(1e6) # How many entries are saved per saving iteration
-tic1 = time.perf_counter()
-tic2 = time.perf_counter()
-tic3 = time.perf_counter()
-list_of_dfs=[]
-df = pd.DataFrame(columns=["doi","year",'is_oa','publisher','journal_name'])
-with jsonlines.open(filepath) as f:
-    for index, item in enumerate(f):
-            # print(item.keys())
-            if (index+1) % logEntries == 0: # example log every 100000 lines (100000 entries = 0:999999 python index)
-                toc2 = time.perf_counter()
-                print('index = {}'.format(index)," | df appending time in minutes: ",(toc2-tic2)/60, " | Length of list of dfs: ", len(list_of_dfs))
-                tic2 = time.perf_counter()
-            try:
-                df = pd.DataFrame(columns=["doi","year",'is_oa','publisher','journal_name'])
-                data={"doi":item["doi"], 'genre':item['genre'],"year":item['year'],'title':item['title'],
-                            "is_oa":item['is_oa'], "publisher":item['publisher'], "journal_name":item['journal_name']}
-                df=df.append(data,ignore_index=True)
-                list_of_dfs.append(df)
-            except:
-                print(index, " could not be processed")
+fileNameList=os.listdir(path)
+for name in fileNameList:
+    if ".pkl" in name or ".jsonl" in name or ".gz" in name or ".json.gz" in name:
+        fileNameList.remove(name)
+        print(name, "is removed")
 
-print("------------------")
-print("Saving to disk")
-df = pd.concat(list_of_dfs, ignore_index=True)
-df.to_pickle(path + fileName +".pkl")
-list_of_dfs=[]
-toc3 = time.perf_counter()
-timediff=(toc3-tic3)/60
-print("Processing time in minutes: ", timediff)
-tic3 = time.perf_counter()
-        
+for fileName in fileNameList:
+    filepath= path+ fileName
+    tic1 = time.perf_counter()
+    tic2 = time.perf_counter()
+    tic3 = time.perf_counter()
+    list_of_dfs=[]
+    df = pd.DataFrame(columns=["doi","year",'is_oa','publisher','journal_name'])
+    with jsonlines.open(filepath) as f:
+        for index, item in enumerate(f):
+                # print(item.keys())
+                if (index+1) % logEntries == 0: # example log every 100000 lines (100000 entries = 0:999999 python index)
+                    toc2 = time.perf_counter()
+                    print('index = {}'.format(index)," | df appending time in minutes: ",(toc2-tic2)/60, " | Length of list of dfs: ", len(list_of_dfs))
+                    tic2 = time.perf_counter()
+                try:
+                    df = pd.DataFrame(columns=["doi","year",'is_oa','publisher','journal_name'])
+                    data={"doi":item["doi"], 'genre':item['genre'],"year":item['year'],'title':item['title'],
+                                "is_oa":item['is_oa'], "publisher":item['publisher'], "journal_name":item['journal_name']}
+                    df=df.append(data,ignore_index=True)
+                    list_of_dfs.append(df)
+                except:
+                    print(index, " could not be processed")
+
+    print("------------------")
+    print("Saving to disk")
+    df = pd.concat(list_of_dfs, ignore_index=True)
+    df.to_pickle(path + fileName +".pkl")
+    list_of_dfs=[]
+    toc3 = time.perf_counter()
+    timediff=(toc3-tic3)/60
+    print("Processing time in minutes: ", timediff)
+    tic3 = time.perf_counter()
+
+
+
+
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------  
 # Read anc concatenate exported pickle files
-#-------------------------------------------------------
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 
 tic = time.perf_counter()
 df=pd.read_pickle(str(int(8e6))+".pkl")
@@ -922,8 +976,12 @@ df["publisher"][df["doi"]==searchDoi]
 
 
 
+
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 # Test opeing the gzipped file with other means
-#-------------------------------------------------------
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 import json_lines
 with json_lines.open('Y:\\Reference_Databases\\unpaywall\\unpaywall_snapshot_2021-07-02T151134.jsonl.gz',broken=True) as f:
     for index, item in enumerate(f):
@@ -968,8 +1026,6 @@ with jsonlines.open('Y:\\Reference_Databases\\unpaywall\\xaa') as f:
     # for line in f.iter():
     #     print line['doi'] # or whatever else you'd like to do
 
-# Read the splitted gzip files
-#-------------------------------------------------------
 
 
 
@@ -977,13 +1033,11 @@ with jsonlines.open('Y:\\Reference_Databases\\unpaywall\\xaa') as f:
 
 
 
-
-
-
-
-
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 # corpus to single file and processing with LDA
-#-------------------------------------------------------
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 # Load packages
 from Functions.F1_Subsets_and_PreProcessing import Dict_Loader
 from Functions.F2_Model_Building import path_creator, log_printer
@@ -1055,9 +1109,11 @@ ldaModel.update([oneDoc,oneDoc]) # LDA needs multiple docs, current implementati
 
 
 
-
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 # Use pandas for appending and loading chunks
-#-------------------------------------------------------
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 # Load packages
 from Functions.F1_Subsets_and_PreProcessing import Dict_Loader
 from Functions.F2_Model_Building import path_creator, log_printer
@@ -1172,10 +1228,11 @@ print("Time:", toc-tic)
 
 
 
-
-
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 # Write list of strings to text file and stream it
-#-------------------------------------------------------
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 # Load packages
 from Functions.F1_Subsets_and_PreProcessing import Dict_Loader
 from Functions.F2_Model_Building import path_creator, log_printer
@@ -1283,3 +1340,136 @@ print("Time:", toc-tic)
 
 # Processing time: 181 s (1000 docs)
 # Processing time: 1841 s (97802 docs) -> 3h / 1M docs
+
+
+
+
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# SciView can only be activated through the powershell!!!!!!!!!!!!!!!!!!!!!
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+
+
+
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# ## Streaming and sampling approach for phrase model, dictionary, BoW corpus and LDA
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# Load packages
+from Functions.F1_Subsets_and_PreProcessing import Dict_Loader
+from Functions.F2_Model_Building import path_creator, log_printer, MyCorpus
+import pickle
+import pandas as pd
+import gensim
+import time
+# import pyLDAvis.gensim_models
+import gc
+import memory_profiler as mem_profile
+import csv
+import ast
+
+from modelConfig_0_99 import *
+with open('modelConfig_0_99.py', 'r') as f:
+    print(f.read())
+
+# Define certain paths
+LogfilePath=Model_Path + LogFileName
+sampledDocTextFilePath=Model_Path + sampledDocPath
+
+# Process through directories if an InterDir is defined it starts from there
+for dirNum in range(StartDir,EndDir+1):
+
+    # Load the Preprocess Meta Data of the current directory number
+    Meta=pd.read_pickle(IntermediateData_Path + str(dirNum).zfill(3) + MetaDataFiltered_Suffix]))
+
+    # Sample random entries of the Meta data by applying the pandas sample function to the meta data frame
+    MetaSample=Meta.sample(n=sampleNDoc, random_state=randomState)
+
+    # Load the preprocessed full text of the currend directory number
+    FtPr=Dict_Loader(dirNum, IntermediateData_Path, FtPr_Suffix)
+
+    # Filter the preprocessed full text based on the sampled meta data
+    FtPrFi=[FtPr[DOI] for DOI in list(MetaSample["DOI"])]
+
+    # Open a text file and write the sampled documents to it. The texte file is then used for streaming the sampled documents
+    
+    outfile= open(sampledDocTextFilePath,'a', encoding="utf-8")
+    for doc in FtPrFi:
+        outfile.writelines("%s " % token for token in doc)
+        outfile.write('\n')
+    outfile.close()
+
+    # Append the MetaSample dataframe to the Metasample dataframe if it does not yet exist
+    try:
+        MetaSampleTotal=MetaSampleTotal.append(MetaSample,ignore_index=True)
+        print("Appended")
+    except:
+        MetaSampleTotal=MetaSample
+        print("Created")
+
+    print("Directory with number: ", dirNum, " is sampled", file=open(LogfilePath,'a'))
+
+print("-------------------------------------------------", file=open(LogfilePath,'a'))
+
+# Get the number of lines in the sampled documents text file without loading the whole file
+while open(sampledDocTextFilePath, "r") as f:
+    for index, line in enumerate(f)
+
+print("Length of the sampled Meta Data dataframe: ", len(MetaSampleTotal), " Length of the sampled doc text file: ", index, file=open(LogfilePath,'a'))
+
+# Save the sampled MetaSampleTotal dataframe
+MetaSampleTotal.to_pickle(Model_Path + PreProcessMetaDataSample_Suffix)
+
+
+
+# Define the path for for the streaming class (MyCorpus())
+CorpusStreamPath=sampledDocTextFilePath
+
+# Intiate empty bigram model
+bigram = gensim.models.phrases.Phrases(MyCorpus(), min_count=bigramMinFreq, threshold=bigramThreshold, max_vocab_size=phraseVocabSize)
+
+# Freeze bigram model
+frozen_bigram_model = bigram.freeze()
+
+# Open a text file and write the sampled documents
+outfile= open("test2bigram.txt",'a', encoding="utf-8")
+for doc in frozen_bigram_model[MyCorpus()]:
+    outfile.writelines("%s " % token for token in doc)
+    outfile.write('\n')
+outfile.close()
+
+
+# Create the streaming class
+class MyCorpus:
+    def __iter__(self):
+        for line in open('test2bigram.txt', encoding="utf-8"):
+            # assume there's one document per line, tokens separated by whitespace
+            yield line.lower().split()
+
+#Intialize dictinary and add corpus with bigrams
+dct=gensim.corpora.Dictionary(MyCorpus(),prune_at=dictVocab)
+
+["DictAddDocs",dct.num_docs, len(dct),dct.num_pos]
+
+# Create the streaming class for BoW Corpus
+
+
+class MyCorpus:
+    def __iter__(self):
+        for line in open('test2bigram.txt', encoding="utf-8"):
+            # assume there's one document per line, tokens separated by whitespace
+            yield dct.doc2bow(line.lower().split())
+
+
+import time
+tic = time.perf_counter()
+lda = gensim.models.ldamodel.LdaModel(corpus=MyCorpus(), 
+                                      id2word=dct,
+                                      num_topics=100,
+                                      update_every=1,
+                                      chunksize=10000,
+                                      passes=1)
+toc= time.perf_counter()
+print("Time:", toc-tic)

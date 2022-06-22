@@ -37,8 +37,8 @@ function dlunzip() {
         echo "Data location is at: "$RAW_DATA_PATH""
         echo "Unzip location is at: "$DATA_PATH""
         echo "unziping file ${y}00000"
-        unzip $DATA_PATH/${y}00000/"*.zip" -d $DATA_PATH/${y}00000/
-        # unzip $RAW_DATA_PATH/${y}00000/"*.zip" -d $DATA_PATH/${y}00000/
+        # unzip $DATA_PATH/${y}00000/"*.zip" -d $DATA_PATH/${y}00000/
+        unzip $RAW_DATA_PATH/${y}00000/"*.zip" -d $DATA_PATH/${y}00000/
     done
 }
 
@@ -59,7 +59,7 @@ function pdf2text() {
 function overview(){
     init
     for y in $(seq -w $1 $2 $3); do
-	    echo "Directory: "$y "PDF count: " $(find $DATA_PATH/${y}00000/ -name "*.pdf" | wc -l) "Text count: " $(find $DATA_PATH/${y}00000/ -name "*.txt" | wc -l)
+	    echo "Directory: "$y "PDF count: " $(find $DATA_PATH/${y}00000/ -name "*.pdf*" | wc -l) "Text count: " $(find $DATA_PATH/${y}00000/ -name "*.txt" | wc -l)
     done
 }
 
@@ -68,6 +68,13 @@ function rmpdf(){
     init
     for y in $(seq -w $1 $2); do
         find $DATA_PATH/${y}00000/ -name "*.pdf" | xargs rm
+    done
+}
+
+function rntxt(){
+    init
+    for y in $(seq -w $1 $2); do
+        rename -v 's/.pdf.txt/.txt/' $DATA_PATH/${y}00000/**/*.pdf.txt
     done
 }
 
@@ -85,6 +92,7 @@ echo
 echo "task commmands:"
 echo "(task) command <argument>     description"
 echo "---------------------------------------------------------------------------------------------"
+echo "init                         Check that the /mnt/share/ directory exist already"
 echo "torrentdl                     Downloads torrent files from scimag"
 echo "dlunzip <001> <004>           unzips files in a range of directories (Activate root first!!!)"
 echo "pdf2text <001> <004>          Uses pdftotext from popler utilities to transform pdf files into text files"
@@ -119,6 +127,9 @@ case "$1" in
     rmpdf)
         rmpdf $2 $3
         ;;
+    rntxt)
+        rntxt $2 $3
+        ;;
     rmzip)
         rmzip $2 $3
         ;;
@@ -126,3 +137,6 @@ case "$1" in
         help help
         exit 1
 esac
+
+
+
