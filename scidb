@@ -81,7 +81,7 @@ function rntxt(){
 function rmzip(){
     init
     for y in $(seq -w $1 $2); do
-        rm $DATA_PATH/${y}00000/*.zip
+        rm $RAW_DATA_PATH/${y}00000/*.zip
         echo "Remove files then from the recycle bin"
     done
 }
@@ -90,20 +90,23 @@ function help() {
 echo
 echo
 echo "task commmands:"
-echo "(task) command <argument>     description"
+echo "(task) command <argument>         description"
 echo "---------------------------------------------------------------------------------------------"
-echo "init                         Check that the /mnt/share/ directory exist already"
-echo "torrentdl                     Downloads torrent files from scimag"
-echo "dlunzip <001> <004>           unzips files in a range of directories (Activate root first!!!)"
-echo "pdf2text <001> <004>          Uses pdftotext from popler utilities to transform pdf files into text files"
-echo "rmpdf  <001> <004>            Removes unzipped pdf files (usually applied after transformation to text)"
+echo "torrentdl                         Downloads torrent files from scimag"
+echo "dlunzip <001> <004> (req. rooot)  unzips files in a range of directories (Activate root first!!!)"
+echo "pdf2text <001> <004>              Uses pdftotext from popler utilities to transform pdf files into text files"
+echo "rmpdf  <001> <004>                Removes unzipped pdf files (usually applied after transformation to text)"
+echo "rntext  <001> <004>               Renames text files which end with .pdf.txt into .pdf"
+echo "rmzip  <001> <004>                Removes zip files (usually applied after deleting of pdfs)"
+echo 
+echo 
 echo 
 echo "Helping commands:"
-echo "command                       description"
+echo "command                           description"
 echo "--------------------------------------------"
-echo "dos2unix                      Convert dos files into unix files. Apply if a problem comes up"
-echo "init                          Loads the env paths and creates the mount"
-echo "overview <001> <1> <004>      Returns pdf and text file count for the given directory range"
+echo "dos2unix                          Convert dos files into unix files. Apply if a problem comes up"
+echo "init                              Loads the env paths and creates the mount"
+echo "overview <001> <1> <004>          Returns pdf and text file count for the given directory range"
 echo 
 }
 

@@ -952,7 +952,7 @@ for fileName in fileNameList:
 
 #-------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------  
-# Read anc concatenate exported pickle files
+# Read and concatenate exported pickle files
 #-------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------
 
@@ -1344,6 +1344,461 @@ print("Time:", toc-tic)
 
 
 
+
+
+
+
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# ## Test: Search and Match the preprocessing meta data and reference database meta data
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+
+import pandas as pd
+import pickle
+import time
+import os
+
+'''
+Notes:
+Data frame with 1M lines load in approx 10s
+Goal is it to assign the filepath to the reference database meta data which then can be sampled
+The DOI from the data side are filtered based on the preprocessed filter meta data file
+Concatenation of 10 reference database files is 40s
+
+'''
+
+# Get a list off all the unpaywall metadata .pkl files
+path='Y:\\Reference_Databases\\unpaywall\\'
+fileNameList=os.listdir(path)
+for name in fileNameList:
+    if ".pkl" not in name:
+        fileNameList.remove(name)
+        print(name, "is removed")
+
+# Concatenate the firs 10 metadata files
+tic = time.perf_counter()
+df3=pd.concat([pd.read_pickle(path+name) for name in fileNameList[0:10]], ignore_index=True)
+toc = time.perf_counter()
+print(toc-tic)
+
+# Load one of the Filtered Meta Data Files and the doi file path dictionary
+tic = time.perf_counter()
+path='Y:\\IntermediateData\\040_MetaDataFiltered.pkl'
+toc = time.perf_counter()
+print(toc-tic)
+df2=pd.read_pickle(path)
+path='Y:\\IntermediateData\\040_DOI_Path_Dict.pkl'
+tic = time.perf_counter()
+with open(path, 'rb') as handle:
+    interDict = pickle.load(handle)
+toc = time.perf_counter()
+print(toc-tic)
+
+# Get a reduced doi pathy dicitonary based on the preprocessed filtered meta data
+keyList=list(df2["DOI"])
+valueList=[interDict[key] for key in keyList]
+len(keyList)
+len(valueList)
+filteredDct = dict(zip(keyList, valueList))
+
+
+# Create a new empyt columen in the df3 dataframe which will hold the file paths
+df3["FilePath"]=None
+
+# Create pandas series containing the found file paths
+filepathSeries=df3['doi'].map(filteredDct)
+filepathSeries.value_counts()
+
+# Map the non-NaN values from the filepathSeries to the df3 dataframe. But only map there is not already a file path assigned
+# Map the file path series to the file path values in the df3 dataframe, but do not map NaN to None
+df3["FilePath"]=filepathSeries.map(lambda x: x if pd.notnull(x) else None)
+df3["FilePath"].value_counts()
+
+
+# Test with an additional set
+
+# Create a new empyt columen in the df3 dataframe which will hold the file paths
+df3["FilePath"]=None
+
+# Load one of the Filtered Meta Data Files and the doi file path dictionary
+tic = time.perf_counter()
+path='Y:\\IntermediateData\\041_MetaDataFiltered.pkl'
+toc = time.perf_counter()
+print(toc-tic)
+df4=pd.read_pickle(path)
+path='Y:\\IntermediateData\\041_DOI_Path_Dict.pkl'
+tic = time.perf_counter()
+with open(path, 'rb') as handle:
+    interDict2 = pickle.load(handle)
+toc = time.perf_counter()
+print(toc-tic)
+
+# Get a reduced doi pathy dicitonary based on the preprocessed filtered meta data
+keyList=list(df4["DOI"])
+valueList=[interDict2[key] for key in keyList]
+len(keyList)
+len(valueList)
+filteredDct2 = dict(zip(keyList, valueList))
+
+# Concatenate filteredDct and filteredDct2
+len(filteredDct)
+len(filteredDct2)
+filteredDct.update(filteredDct2)
+len(filteredDct)
+
+# Create pandas series containing the found file paths
+filepathSeries=df3['doi'].map(filteredDct)
+filepathSeries.value_counts()
+
+# Map the non-NaN values from the filepathSeries to the df3 dataframe. But only map there is not already a file path assigned
+# Map the file path series to the file path values in the df3 dataframe, but do not map NaN to None
+df3["FilePath"]=filepathSeries.map(lambda x: x if pd.notnull(x) else None)
+df3["FilePath"].value_counts()
+
+# Check the sum which indicates no dublicates
+df3["FilePath"].value_counts().sum()
+
+# Check validity of the doi Matching
+df3.FilePath.first_valid_index()
+df3.loc[1221]
+df3["doi"].loc[1221]
+filePath=df3["FilePath"].loc[1221]
+
+#Print title of the article
+df3["title"].loc[1221]
+
+# Print corresponding data and check if it matches
+with open(filePath, "r", encoding="utf8") as f:
+    contents = f.read()
+    len(contents)
+    print(contents[0:100])
+
+# -> valid, but the file Path is differently formated !!!!!!!!!
+
+
+
+
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# ## Concatenate 000-099 meta data files and doi path dictionaries together
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+import pandas as pd
+import pickle
+import time
+import os
+
+# Define input paths and file names
+IntermediateData_Path="Y:\\IntermediateData\\"
+doiPath_Suffix="_DOI_Path_Dict.pkl"
+doiPathFiltered_Suffix="_DOI_Path_DictFiltered.pkl"
+metaData_Suffix="_MetaDataFiltered.pkl"
+
+# Set the dirs to save doi and paths (Dictionaries have to be generated to the corresponding directories beforehand)
+StartDir=0
+EndDir=99
+
+### Concatendated doi path dict
+
+# Define Path for saving new concatenated dictionary
+saveNameDict=(IntermediateData_Path + str(StartDir).zfill(3) + "_" + str(EndDir).zfill(3) + doiPath_Suffix).replace(" ","")
+
+# create a binary pickle file 
+f = open(saveNameDict,"wb")
+# Init new dict
+doiPathDict={}
+
+# Iterate trough data directories
+for dirNum in range(StartDir,EndDir+1):
+    # Bring for example 27 into the form of "027"
+    dirNum=str(dirNum).zfill(3)
+    # Create path to dictionary
+    openName=(IntermediateData_Path + dirNum + doiPath_Suffix).replace(" ","")
+    # Open the dictionary
+    with open(openName, 'rb') as handle:
+        interDict = pickle.load(handle)
+    # Append the dictionary
+    doiPathDict = {**doiPathDict, **interDict}
+    print(len(interDict), len(doiPathDict))
+
+# write the python object (dict) to pickle file
+pickle.dump(doiPathDict,f)
+# close file
+f.close()
+
+
+### Read multple filtered preprocessed meta data files and concatenate them into one dataframe
+
+# Define Path for saving new concatenated dataframe
+saveNameDf=(IntermediateData_Path + str(StartDir).zfill(3) + "_" + str(EndDir).zfill(3) + metaData_Suffix).replace(" ","")
+
+# Create a list with the file names
+fileList=[]
+for dirNum in range(StartDir,EndDir+1):
+    # Bring for example 27 into the form of "027"
+    dirNum=str(dirNum).zfill(3)
+    # Create path to dictionary
+    openName=(IntermediateData_Path + dirNum + metaData_Suffix).replace(" ","")
+    # Append the file name to the list
+    fileList.append(openName)
+    print(len(fileList))
+
+# Concatenate all metadata files
+tic = time.perf_counter()
+df=pd.concat([pd.read_pickle(name) for name in fileList], ignore_index=True)
+toc = time.perf_counter()
+print(toc-tic)
+
+# Filter the new doi path dict based on the new concatenated dataframe
+    
+# Define Path for saving new filtered dictionary
+loadNameDict=(IntermediateData_Path + str(StartDir).zfill(3) + "_" + str(EndDir).zfill(3) + doiPath_Suffix).replace(" ","")
+with open(loadNameDict, 'rb') as handle:
+    interDict = pickle.load(handle)
+
+
+# Get a reduced doi pathy dicitonary based on the preprocessed filtered meta data
+keyList=list(df["DOI"])
+valueList=[interDict[key] for key in keyList]
+len(keyList)
+len(valueList)
+filteredDct = dict(zip(keyList, valueList))
+
+saveNameDict=(IntermediateData_Path + str(StartDir).zfill(3) + "_" + str(EndDir).zfill(3) + doiPathFiltered_Suffix).replace(" ","")
+
+# create a binary pickle file 
+f = open(saveNameDict,"wb")
+# write the python object (dict) to pickle file
+pickle.dump(filteredDct,f)
+# close file
+f.close()
+
+# -> This continuous in the next section
+
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# ## Concatenate 0-50 of the reference database meta data files
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+
+import pandas as pd
+import pickle
+import time
+import os
+
+'''
+Notes:
+It seems it is not possible to concatenate all of the files dues to the memory limit.
+Concatenation of 20 reference database files is 52s
+Concatenation of 50 reference database files is 228s
+'''
+
+path='Y:\\Reference_Databases\\unpaywall\\'
+
+### Concatendated reference database metadata file
+
+# Get a list off all the unpaywall metadata .pkl files
+fileNameList=os.listdir(path)
+for name in fileNameList:
+    if ".pkl" not in name:
+        fileNameList.remove(name)
+        print(name, "is removed")
+
+# Concatenate all metadata files
+tic = time.perf_counter()
+df3=pd.concat([pd.read_pickle(path+name) for name in fileNameList[0:50]], ignore_index=True)
+toc = time.perf_counter()
+print(toc-tic)
+
+# -> This continuous in the next section
+
+
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# ## Match all of the reference database dois to a doi path
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+
+import pandas as pd
+import pickle
+import time
+import os
+
+# Define input paths and file names
+doiPathFiltered_Suffix="_DOI_Path_DictFiltered.pkl"
+path='Y:\\Reference_Databases\\unpaywall\\'
+IntermediateData_Path="Y:\\IntermediateData\\"
+
+# Set the dirs to save doi and paths (Dictionaries have to be generated to the corresponding directories beforehand)
+StartDir=0
+EndDir=99
+
+# Create a new empyt columen in the df3 dataframe which will hold the file paths
+df3["FilePath"]=None
+
+# Define Path for saving new filtered dictionary
+loadNameDict=(IntermediateData_Path + str(StartDir).zfill(3) + "_" + str(EndDir).zfill(3) + doiPathFiltered_Suffix).replace(" ","")
+with open(loadNameDict, 'rb') as handle:
+    filteredDct = pickle.load(handle)
+len(filteredDct)
+
+# Create pandas series containing the found file paths
+
+
+# Map the non-NaN values from the filepathSeries to the df3 dataframe. But only map there is not already a file path assigned
+# Map the file path series to the file path values in the df3 dataframe, but do not map NaN to None
+df3["FilePath"]=filepathSeries.map(lambda x: x if pd.notnull(x) else None)
+df3["FilePath"].value_counts()
+
+# Check the sum which indicates no dublicates
+df3["FilePath"].value_counts().sum()
+
+saveName='Y:\\Reference_Databases\\unpaywall\\' + fileNameList[0] + "-" + fileNameList[50]+ "_"+ str(StartDir).zfill(3) + "-" + str(EndDir).zfill(3) + ".pkl"
+
+# Save the dataframe to a pickle file
+df3.to_pickle(saveName)
+
+# -> This continuous in the next section
+
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# ## Sample multiple matched dois from the reference database and check if the path is correct
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+
+
+import pandas as pd
+import pickle
+import time
+import os
+
+# Define input paths and file names
+# doiPathFiltered_Suffix="_DOI_Path_DictFiltered.pkl"
+# path='Y:\\Reference_Databases\\unpaywall\\'
+# IntermediateData_Path="Y:\\IntermediateData\\"
+
+# Set the dirs to save doi and paths (Dictionaries have to be generated to the corresponding directories beforehand)
+StartDir=0
+EndDir=99
+
+loadName='Y:\\Reference_Databases\\unpaywall\\' + fileNameList[0] + "-" + fileNameList[50]+ "_"+ str(StartDir).zfill(3) + "-" + str(EndDir).zfill(3) + ".pkl"
+
+tic = time.perf_counter()
+df=pd.read_pickle(loadName)
+toc = time.perf_counter()
+print(toc-tic) #192s
+
+# Create a subset of the dataframe by sampling randomly n rows which have non-None file paths
+df2=df[df["FilePath"].notnull()]
+df3=df2.sample(n=100)
+df3.head()
+
+# Realized that I should also have linked the FtPr data !!!!!!!
+
+
+
+
+
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# Test: if it is better to try find a match in the reference databased based on the 
+# Preprocessed metadata instead the other way around
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+
+# Check if all of the reference database files can be put into a single file
+import pandas as pd
+import pickle
+import time
+import os
+
+'''
+Notes:
+Concatenation of 20 reference database files is 52s
+Concatenation of 50 reference database files is 228s
+Concatenation of 100 reference database files is 466s
+Concatenation of all of the meta data 1040s / 17min -> But can not be saved due to memory error!
+
+'''
+path='Y:\\Reference_Databases\\unpaywall\\'
+
+### Concatendated reference database metadata file
+# Get a list off all the unpaywall metadata .pkl files
+fileNameList=os.listdir(path)
+for name in fileNameList:
+    if ".pkl" not in name:
+        fileNameList.remove(name)
+        print(name, "is removed")
+fileNameList.remove("xaa.pkl-xby.pkl_000-099.pkl")
+fileNameList.remove("xaa.pkl-xew.pkl.pkl")
+
+# Concatenate all metadata files
+tic = time.perf_counter()
+df=pd.concat([pd.read_pickle(path+name) for name in fileNameList], ignore_index=True)
+toc = time.perf_counter()
+print(toc-tic)
+
+# Save the dataframe 
+saveName='Y:\\Reference_Databases\\unpaywall\\' + fileNameList[0] + "-" + fileNameList[-1] + ".pkl"
+
+# Save the dataframe to a pickle file
+df.to_pickle(saveName)
+
+# Load it again and check how much time passes
+tic = time.perf_counter()
+df=pd.read_pickle(saveName)
+toc = time.perf_counter()
+print(toc-tic) # take 1142s or 17min
+
+# Load one of the preprocessed meta data files
+path='Y:\\IntermediateData\\040_MetaDataFiltered.pkl'
+df2=pd.read_pickle(path)
+
+# For every value in the "DOI" column of the df2 dataframe, extract the corresponding row from the df dataframe
+df3=df2.merge(df, how='left', left_on='DOI', right_on='doi')
+df3.head()
+
+# For every string the df2 doi column extract the row in the df dataframe which has the same doi
+df3=df2.merge(df, how='left', left_on='doi', right_on='doi')
+df3.head()
+
+# check if the "title" column only has unique values
+df3["title"].nunique()
+
+# check if "doi" column only has unique values
+df3["doi"].nunique()
+
+# Get an example of title which comes up more than once
+df3["title"].value_counts().head(100)
+
+# Get a list of non unique values of the "title" column of the df3 dataframe
+nonUniTitleList=list(df3["title"].value_counts().index[df3["title"].value_counts()>1])
+len(nonUniTitleList)
+nonUniTitleList[-1]
+df3[df3["title"]=="Transformations of sugars in alkaline solutions"]
+
+# Drop every row if the corresponding title value is in the nonUniTitleList
+df4=df3[~df3["title"].isin(nonUniTitleList)]
+
+# Check if the new dataframe now has unique values in the "title" column
+df4["title"].nunique()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #-------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------
 # SciView can only be activated through the powershell!!!!!!!!!!!!!!!!!!!!!
@@ -1421,8 +1876,6 @@ print("Length of the sampled Meta Data dataframe: ", len(MetaSampleTotal), " Len
 
 # Save the sampled MetaSampleTotal dataframe
 MetaSampleTotal.to_pickle(Model_Path + PreProcessMetaDataSample_Suffix)
-
-
 
 # Define the path for for the streaming class (MyCorpus())
 CorpusStreamPath=sampledDocTextFilePath
