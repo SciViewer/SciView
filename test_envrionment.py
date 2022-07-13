@@ -412,6 +412,283 @@ plt.show()
 metaData['Token Amount'][metaData['Token Amount']>50]
 
 
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# Testing of Dictionary and Phrases Model 
+# Check if texts can be added to an existing dictinary
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+
+dirNum=0
+# Start Global Timer which times the whole function
+tic = time.perf_counter()
+FtPr=Dict_Loader(dirNum, IntermediateData_Path, FtPr_Suffix)
+#Stop global timer and print
+toc = time.perf_counter()
+print("Time elapsed in seconds: ", round(toc-tic,4), ", in minutes ", round((toc-tic)/60,4), ", in hours: ", round((toc-tic)/3600,4))
+
+# Start Global Timer which times the whole function
+tic = time.perf_counter()
+dct=gensim.corpora.Dictionary(list(FtPr.values()))
+#Stop global timer and print
+toc = time.perf_counter()
+print("Time elapsed in seconds: ", round(toc-tic,4), ", in minutes ", round((toc-tic)/60,4), ", in hours: ", round((toc-tic)/3600,4))
+
+print(dct.num_docs,len(dct))
+#Out
+# 99984
+
+
+dirNum=1
+# Start Global Timer which times the whole function
+tic = time.perf_counter()
+FtPr=Dict_Loader(dirNum, IntermediateData_Path, FtPr_Suffix)  
+dct.add_documents(list(FtPr.values()))
+#Stop global timer and print
+toc = time.perf_counter()
+print("Time elapsed in seconds: ", round(toc-tic,4), ", in minutes ", round((toc-tic)/60,4), ", in hours: ", round((toc-tic)/3600,4))
+#Out
+# Time elapsed in seconds:  800.4948 , in minutes  13.3416 , in hours:  0.2224
+
+print(dct.num_docs,len(dct))
+#Out
+# 199976
+
+dirNum=2
+# Start Global Timer which times the whole function
+tic = time.perf_counter()
+FtPr=Dict_Loader(dirNum, IntermediateData_Path, FtPr_Suffix)  
+dct.add_documents(list(FtPr.values()))
+#Stop global timer and print
+toc = time.perf_counter()
+print("Time elapsed in seconds: ", round(toc-tic,4), ", in minutes ", round((toc-tic)/60,4), ", in hours: ", round((toc-tic)/3600,4))
+#Out
+# Time elapsed in seconds:  1164.1192 , in minutes  19.402 , in hours:  0.3234
+
+print(dct.num_docs,len(dct))
+#Out
+# 299975 2269904
+
+
+
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# Testing of Dictionary and Phrases Model 
+# Test if it is faster to merge dictionaries instead of adding documents
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+
+dirNum=0
+# Start Global Timer which times the whole function
+tic = time.perf_counter()
+FtPr=Dict_Loader(dirNum, IntermediateData_Path, FtPr_Suffix) 
+dct=gensim.corpora.Dictionary(list(FtPr.values()))
+dirNum=1
+FtPr=Dict_Loader(dirNum, IntermediateData_Path, FtPr_Suffix)  
+dct.add_documents(list(FtPr.values()))
+print(dct.num_docs,len(dct))
+#Stop global timer and print
+toc = time.perf_counter()
+print("Time elapsed in seconds: ", round(toc-tic,4), ", in minutes ", round((toc-tic)/60,4), ", in hours: ", round((toc-tic)/3600,4))
+
+#Out
+# 199976 2185638
+# Time elapsed in seconds:  945.4743 , in minutes  15.7579 , in hours:  0.2626
+
+dirNum=0
+# Start Global Timer which times the whole function
+tic = time.perf_counter()
+FtPr=Dict_Loader(dirNum, IntermediateData_Path, FtPr_Suffix) 
+dct1=gensim.corpora.Dictionary(list(FtPr.values()))
+dirNum=1
+# Start Global Timer which times the whole function
+tic = time.perf_counter()
+FtPr=Dict_Loader(dirNum, IntermediateData_Path, FtPr_Suffix) 
+dct2=gensim.corpora.Dictionary(list(FtPr.values()))
+dct1.merge_with(dct2)
+print(dct1.num_docs,len(dct1))
+#Stop global timer and print
+toc = time.perf_counter()
+print("Time elapsed in seconds: ", round(toc-tic,4), ", in minutes ", round((toc-tic)/60,4), ", in hours: ", round((toc-tic)/3600,4))
+
+#Out
+# 199976 3426641
+# Time elapsed in seconds:  1174.3321 , in minutes  19.5722 , in hours:  0.3262
+
+'''
+Notes:
+It seems that the output of mergin is a transformer not a dict
+'''
+
+
+
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# Testing of Dictionary and Phrases Model 
+# Test if bulding a corpus is faster with a smaller dictionary
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+
+dirNum=0
+# Start Global Timer which times the whole function
+tic = time.perf_counter()
+FtPr=Dict_Loader(dirNum, IntermediateData_Path, FtPr_Suffix)  
+corpus = [dct.doc2bow(text) for text in list(FtPr.values())]
+#Stop global timer and print
+toc = time.perf_counter()
+print("Time elapsed in seconds: ", round(toc-tic,4), ", in minutes ", round((toc-tic)/60,4), ", in hours: ", round((toc-tic)/3600,4))
+#Out
+# Time elapsed in seconds:  1643.5739 , in minutes  27.3929 , in hours:  0.4565
+
+print(dct.num_docs,len(dct))
+#Out
+# 299975 2269904
+
+dct.filter_extremes(keep_n=500000)
+print(dct.num_docs,len(dct))
+#Out
+# 299975 500000
+
+# Start Global Timer which times the whole function
+tic = time.perf_counter()
+corpus2 = [dct.doc2bow(text) for text in list(FtPr.values())]
+#Stop global timer and print
+toc = time.perf_counter()
+print("Time elapsed in seconds: ", round(toc-tic,4), ", in minutes ", round((toc-tic)/60,4), ", in hours: ", round((toc-tic)/3600,4))
+#Out
+# Time elapsed in seconds:  830.7225 , in minutes  13.8454 , in hours:  0.2308
+
+
+
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# Testing of Dictionary and Phrases Model 
+# Test phrases model with freezing
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+
+dirNum=1
+# Start Global Timer which times the whole function
+tic = time.perf_counter()
+FtPr=Dict_Loader(dirNum, IntermediateData_Path, FtPr_Suffix)  
+# Define bigram and Trigram models
+bigram = gensim.models.phrases.Phrases(list(FtPr.values()), min_count=3)
+# trigram = gensim.models.phrases.Phrases(bigram[list(FtPr.values())], min_count=3)
+# tetragram = gensim.models.phrases.Phrases(trigram[list(FtPr.values())], min_count=3)
+# Apply the bigram and trigram model to each preprocessed tokenized list
+# FtPrNg=[tetragram[trigram[bigram[doc]]] for doc in list(FtPr.values())]
+FtPrNg=[bigram[doc] for doc in list(FtPr.values())]
+#Stop global timer and print
+toc = time.perf_counter()
+print("Time elapsed in seconds: ", round(toc-tic,4), ", in minutes ", round((toc-tic)/60,4), ", in hours: ", round((toc-tic)/3600,4))
+#Out
+# Time elapsed in seconds:  2275.3597 , in minutes  37.9227 , in hours:  0.632
+
+print(list(FtPr.values())[0][0:100])
+#Out
+# ['li', 'chien', 'chen', 'et', 'al', 'effect', 'heat', 'treatment', 'ni', 'au', 'ohmic', 'contact', 'phys', 'stat', 'sol', 'subject', 'classification', 'cg', 'effect', 'heat', 'treatment', 'ni', 'au', 'ohmic', 'contact', 'type', 'gan', 'li', 'chien', 'chen', 'jin', 'kuo', 'ho', 'fu', 'rong', 'chen', 'ji', 'jung', 'kai', 'li', 'chang', 'chang', 'shyang', 'jong', 'chien', 'chiu', 'chao', 'nien', 'huang', 'kwang', 'kuo', 'shih', 'department', 'engineering', 'system', 'science', 'national', 'tsing', 'hua', 'university', 'hsinchu', 'taiwan', 'department', 'material', 'science', 'engineering', 'national', 'chiao', 'tung', 'university', 'hsinchu', 'taiwan', 'opto', 'electronics', 'system', 'laboratory', 'industrial', 'technology', 'research', 'institute', 'chutung', 'hsinchu', 'taiwan', 'received', 'july', 'effect', 'heat', 'treatment', 'temperature', 'microstructure', 'specific', 'contact', 'resistance', 'oxidized', 'ni', 'nm', 'au', 'nm', 'contact', 'type']
+
+print(FtPrNg[0][0:100])
+#Out
+# ['li', 'chien', 'chen', 'et_al', 'effect', 'heat', 'treatment', 'ni', 'au', 'ohmic_contact', 'phys_stat', 'sol_subject', 'classification', 'cg', 'effect', 'heat', 'treatment', 'ni', 'au', 'ohmic_contact', 'type', 'gan', 'li', 'chien', 'chen_jin', 'kuo', 'ho', 'fu', 'rong_chen', 'ji', 'jung', 'kai', 'li', 'chang_chang', 'shyang', 'jong', 'chien', 'chiu', 'chao', 'nien', 'huang', 'kwang', 'kuo', 'shih', 'department', 'engineering', 'system', 'science', 'national_tsing', 'hua_university', 'hsinchu_taiwan', 'department', 'material', 'science_engineering', 'national_chiao', 'tung_university', 'hsinchu_taiwan', 'opto_electronics', 'system', 'laboratory', 'industrial', 'technology', 'research', 'institute', 'chutung', 'hsinchu_taiwan', 'received_july', 'effect', 'heat', 'treatment', 'temperature', 'microstructure', 'specific', 'contact', 'resistance', 'oxidized', 'ni', 'nm', 'au', 'nm', 'contact', 'type', 'gan', 'wa', 'investigated', 'minimum', 'specific', 'contact', 'resistance', 'rc', 'obtained', 'wa', 'cm', 'heat', 'treating', 'air', 'min', 'cross_sectional', 'microstructure', 'heat']
+
+'''
+Notes:
+with freeze
+'''
+
+dirNum=1
+# Start Global Timer which times the whole function
+tic = time.perf_counter()
+FtPr=Dict_Loader(dirNum, IntermediateData_Path, FtPr_Suffix)  
+# Define bigram and Trigram models
+bigram = gensim.models.phrases.Phrases(list(FtPr.values()), min_count=3)
+# trigram = gensim.models.phrases.Phrases(bigram[list(FtPr.values())], min_count=3)
+# tetragram = gensim.models.phrases.Phrases(trigram[list(FtPr.values())], min_count=3)
+# Freeze Model
+frozen_bigram_model = bigram.freeze()
+# frozen_trigram_model = trigram.freeze()
+# frozen_tetragram_model = tetragram.freeze()
+# Apply the bigram and trigram model to each preprocessed tokenized list
+# FtToPrNg=[frozen_tetragram_model[frozen_trigram_model[frozen_bigram_model[doc]]] for doc in list(FtPr.values())]
+FtToPrNg=[frozen_bigram_model[doc] for doc in list(FtPr.values())]
+#Stop global timer and print
+toc = time.perf_counter()
+print("Time elapsed in seconds: ", round(toc-tic,4), ", in minutes ", round((toc-tic)/60,4), ", in hours: ", round((toc-tic)/3600,4))
+#Out
+# Time elapsed in seconds:  686.8023 , in minutes  11.4467 , in hours:  0.1908
+
+
+
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# Testing of Dictionary and Phrases Model 
+# Test adding new dataset to phrase model
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+
+# Start Global Timer which times the whole function
+tic = time.perf_counter()
+dirNum=0
+FtPr=Dict_Loader(dirNum, IntermediateData_Path, FtPr_Suffix)
+FtPr=list(FtPr.values())[0:20000]
+# Define bigram and Trigram models
+bigram = gensim.models.phrases.Phrases(FtPr, min_count=3)
+print(len(bigram.vocab))
+dirNum=1
+FtPr1=Dict_Loader(dirNum, IntermediateData_Path, FtPr_Suffix)  
+FtPr1=list(FtPr1.values())[0:20000]
+# Define bigram and Trigram models
+bigram.add_vocab(FtPr1)
+print(len(bigram.vocab))
+# Apply the bigram and trigram model to each preprocessed tokenized list
+# FtPrNg=[tetragram[trigram[bigram[doc]]] for doc in list(FtPr.values())]
+FtPrNg=[bigram[doc] for doc in FtPr]
+FtPrNg1=[bigram[doc] for doc in FtPr1]
+#Stop global timer and print
+toc = time.perf_counter()
+print("Time elapsed in seconds: ", round(toc-tic,4), ", in minutes ", round((toc-tic)/60,4), ", in hours: ", round((toc-tic)/3600,4))
+#Out
+# 17424778
+# 28701000
+# Time elapsed in seconds:  565.2361 , in minutes  9.4206 , in hours:  0.157
+
+print(FtPrNg[50][0:100])
+#Out
+# ['international_journal', 'geriatric_psychiatry', 'vol', 'schizophrenia', 'onset', 'extreme', 'adult', 'life', 'david', 'castle', 'simon', 'wessely', 'robert', 'howard', 'robin', 'murray', 'department', 'psychological_medicine', 'king_college', 'hospital', 'institute_psychiatry', 'london_uk', 'section', 'old_age', 'psychiatry', 'institute_psychiatry', 'london_uk', 'abstract_objective', 'de_ne', 'epidemiology', 'phenomenology', 'premorbid', 'risk_factor', 'patient', 'rst', 'manifestation', 'schizophrenia', 'like', 'illness', 'age_year', 'compare', 'patient', 'onset', 'age_year', 'design', 'setting', 'subject', 'contact', 'non', 'ective_psychotic', 'illness', 'across', 'age_onset', 'ascertained', 'psychiatric', 'case', 'register', 'patient', 'rediagnosed_according', 'operationalized_criterion', 'psychotic_illness', 'early_late', 'onset', 'compared', 'main', 'outcome_measure', 'phenomenological', 'premorbid', 'aetiological', 'parameter', 'compared', 'two', 'group', 'using', 'risk', 'ratio', 'con_dence', 'interval', 'result', 'late_onset', 'patient', 'compared', 'early_onset', 'counterpart', 'likely', 'female', 'good_premorbid', 'functioning', 'developmental', 'history', 'exhibit', 'persecutory_delusion', 'hallucination', 'le_likely', 'negative', 'schizophrenic_symptom', 'positive', 'family_history', 'schizophrenia', 'su_ered']
+
+# Start Global Timer which times the whole function
+tic = time.perf_counter()
+dirNum=0
+FtPr=Dict_Loader(dirNum, IntermediateData_Path, FtPr_Suffix)
+FtPr=list(FtPr.values())[0:20000]
+# Define bigram and Trigram models
+bigram = gensim.models.phrases.Phrases(FtPr, min_count=3)
+print(len(bigram.vocab))
+dirNum=1
+FtPr1=Dict_Loader(dirNum, IntermediateData_Path, FtPr_Suffix)  
+FtPr1=list(FtPr1.values())[0:20000]
+# Define bigram and Trigram models
+bigram.add_vocab(FtPr1)
+print(len(bigram.vocab))
+# Freeze Model
+frozen_bigram_model = bigram.freeze()
+# Apply the bigram and trigram model to each preprocessed tokenized list
+# FtPrNg=[tetragram[trigram[bigram[doc]]] for doc in list(FtPr.values())]
+FtPrNg=[frozen_bigram_model[doc] for doc in FtPr]
+FtPrNg1=[frozen_bigram_model[doc] for doc in FtPr1]
+#Stop global timer and print
+toc = time.perf_counter()
+print("Time elapsed in seconds: ", round(toc-tic,4), ", in minutes ", round((toc-tic)/60,4), ", in hours: ", round((toc-tic)/3600,4))
+#Out
+# 17424778
+# 28701000
+# Time elapsed in seconds:  760.2073 , in minutes  12.6701 , in hours:  0.2112
+
+print(FtPrNg[50][0:100])
+#Out
+# ['international_journal', 'geriatric_psychiatry', 'vol', 'schizophrenia', 'onset', 'extreme', 'adult', 'life', 'david', 'castle', 'simon', 'wessely', 'robert', 'howard', 'robin', 'murray', 'department', 'psychological_medicine', 'king_college', 'hospital', 'institute_psychiatry', 'london_uk', 'section', 'old_age', 'psychiatry', 'institute_psychiatry', 'london_uk', 'abstract_objective', 'de_ne', 'epidemiology', 'phenomenology', 'premorbid', 'risk_factor', 'patient', 'rst', 'manifestation', 'schizophrenia', 'like', 'illness', 'age_year', 'compare', 'patient', 'onset', 'age_year', 'design', 'setting', 'subject', 'contact', 'non', 'ective_psychotic', 'illness', 'across', 'age_onset', 'ascertained', 'psychiatric', 'case', 'register', 'patient', 'rediagnosed_according', 'operationalized_criterion', 'psychotic_illness', 'early_late', 'onset', 'compared', 'main', 'outcome_measure', 'phenomenological', 'premorbid', 'aetiological', 'parameter', 'compared', 'two', 'group', 'using', 'risk', 'ratio', 'con_dence', 'interval', 'result', 'late_onset', 'patient', 'compared', 'early_onset', 'counterpart', 'likely', 'female', 'good_premorbid', 'functioning', 'developmental', 'history', 'exhibit', 'persecutory_delusion', 'hallucination', 'le_likely', 'negative', 'schizophrenic_symptom', 'positive', 'family_history', 'schizophrenia', 'su_ered']
+
 
 
 
@@ -450,8 +727,6 @@ import time
 # import pyLDAvis.gensim_models
 import gc
 import memory_profiler as mem_profile
-
-
 
 
 # Define input paths and file names
