@@ -59,7 +59,7 @@ function pdf2text() {
 function overview(){
     init
     for y in $(seq -w $1 $2 $3); do
-	    echo "Directory: "$y "PDF count: " $(find $DATA_PATH/${y}00000/ -name "*.pdf*" | wc -l) "Text count: " $(find $DATA_PATH/${y}00000/ -name "*.txt" | wc -l)
+	    echo "Directory: "$y "PDF count: " $(find $DATA_PATH/${y}00000/ -name "*.pdf*" | wc -l) "Text count: " $(find $DATA_PATH/${y}00000/ -name "*.txt" | wc -l) 
     done
 }
 

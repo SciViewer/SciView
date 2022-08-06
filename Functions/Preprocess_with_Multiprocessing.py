@@ -21,7 +21,7 @@ MetaData_Suffix="_MetaData.pkl"
 encodeError_Suffix="_errEnc.pkl"
 
 # Set the dirs to save doi and paths
-StartDir=135
+StartDir=140
 EndDir=149
 
 #----------------------------------------#
@@ -30,14 +30,14 @@ EndDir=149
 for dirNum in range(StartDir,EndDir+1):
     #Load the dict
     dictItem=Dict_Loader(dirNum, IntermediateData_Path, doiPath_Suffix)  
-    print(len(dictItem),list(dictItem.keys())[0:2])
+    print("Length of dictionary num:", dirNum, "is", len(dictItem),"First two keys are:", list(dictItem.keys())[0:2])
 
     # Init a list which slices the dictionary into multiple dictionaries (each a chunk af 10000)
     slicedDictList=[]
     # Create and append dictionary chunks
     for item in Chunks(dictItem, 10000):
         slicedDictList.append(item)
-        print(len(item))
+        print("Length of the slice is:",len(item), "First two keys of the slice are:", list(item.keys())[0:2])
 
     # Process each dictionary chunk
     print("Available cores: ",mp.cpu_count(), "(Pool = amount of cores)")
@@ -75,7 +75,6 @@ for dirNum in range(StartDir,EndDir+1):
     FtPrName=(IntermediateData_Path + dirNum + FtPr_Suffix).replace(" ","")
     encErrName=(IntermediateData_Path + dirNum + encodeError_Suffix).replace(" ","")
 
-
     # Store the returned elements
     # create a binary pickle file 
     a = open(FtPrName,"wb")
@@ -83,8 +82,6 @@ for dirNum in range(StartDir,EndDir+1):
     pickle.dump(FtPr,a)
     # close file
     a.close()
-
-
 
     # Store the returned elements
     # create a binary pickle file 

@@ -2065,6 +2065,88 @@ df4["title"].nunique()
 
 
 
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# Apply dask for the reference database meta data concatenation
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+
+import dask.dataframe as dd
+import pandas as pd
+import os
+import time
+
+path='Y:\\Reference_Databases\\unpaywall\\splitted_old'
+csvPath='Y:\\Reference_Databases\\unpaywall\\xaa-xew.csv'
+
+# Get a list off all the unpaywall metadata .pkl files
+fileNameList=os.listdir(path)
+for name in fileNameList:
+    if ".pkl" not in name:
+        fileNameList.remove(name)
+        print(name, "is removed")
+
+
+# Add the first file with headers to the csv file
+df=pd.read_pickle(path +"\\"+ fileNameList[0])
+df.to_csv(csvPath, mode='a', index=False, header=True)
+
+# Append all file in the fileNameList into a single csv file
+for name in fileNameList[1::]:
+    df=pd.read_pickle(path+"\\"+name)
+    df.to_csv(csvPath, mode='a', index=False, header=False)
+    print(name, "is appended")
+
+# Read the created csv file with dask
+df=dd.read_csv(csvPath, assume_missing=True) #some year dates are missing !!!
+
+# show the amount of dask partitions
+df.npartitions
+
+# Compute head
+df.head(n=5, npartitions=1, compute=True)
+
+
+# Load one of the preprocessed meta data files
+path='Y:\\IntermediateData\\040_MetaDataFiltered.pkl'
+df2=pd.read_pickle(path)
+df2.columns=["doi", "TokenAmount", "Language"]
+
+# For every string the df2 doi column extract the row in the df dask dataframe which has the same doi
+join = df.merge(df2, how="inner", on=["doi"])
+
+# compute the join and time it
+tic = time.perf_counter()
+pandasdf=join.compute()
+pandasdf.columns
+toc = time.perf_counter()
+print(toc-tic) 
+
+
+# # check if the "title" column only has unique values
+# df3["title"].nunique()
+
+# # check if "doi" column only has unique values
+# df3["doi"].nunique()
+
+# # Get an example of title which comes up more than once
+# df3["title"].value_counts().head(100)
+
+# # Get a list of non unique values of the "title" column of the df3 dataframe
+# nonUniTitleList=list(df3["title"].value_counts().index[df3["title"].value_counts()>1])
+# len(nonUniTitleList)
+# nonUniTitleList[-1]
+# df3[df3["title"]=="Transformations of sugars in alkaline solutions"]
+
+# # Drop every row if the corresponding title value is in the nonUniTitleList
+# df4=df3[~df3["title"].isin(nonUniTitleList)]
+
+# # Check if the new dataframe now has unique values in the "title" column
+# df4["title"].nunique()
+
+
+
+
 
 
 

@@ -132,33 +132,41 @@ def Preprocessed_Dict_and_Metadata(doiPathDict):
 
     # Iterate trough each doi and corresponding path  in the dictionary
     for doi, path in doiPathDict.items():
+
         # Load Text
         try:
             Ft=open(path, "r", encoding="utf8").read()
+
             # Try detecting language
             try:
                 language=detect_langs(Ft)
             except:
                 language="no language detected"
-            # Remove the
+
+            # Remove the end of phrase hyphenation
             Ft=Ft.replace("-\n\n","") 
             Ft=Ft.replace("-\n","") 
             # print ("Removed end of line hyphenations")
+
             # FullText_Token.pickle
             FtTo=list(gensim.utils.tokenize(Ft))
             # Define Preprocessing parameters
             minlength = 1
             maxlength = 30
+
+            # Do the preprocessing
             FtToPr=Preprocess_Token_List(FtTo,minlength,maxlength)
+
             # Append MetaData
             MetaData=MetaData.append(pd.DataFrame([[doi,len(FtToPr),language]],
                         columns=["DOI","Token Amount", "Language"]),ignore_index = True)
             # Append Preprocessed texts as dictionary
             FtPr[doi]=FtToPr
+
         except:
             encodingError[doi]=path
         
-        if iterCount % 4000 == 0: 
+        if iterCount % 2000 == 0: 
             toctoc=time.perf_counter()
             print('iterCount = {}'.format(iterCount), "", "Time elapsed in seconds: ", round(toctoc-tictic,4), ", in minutes ", round((toctoc-tictic)/60,4), ", in hours: ", round((toctoc-tictic)/3600,4))
             tictic= time.perf_counter()

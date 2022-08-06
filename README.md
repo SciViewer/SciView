@@ -109,18 +109,20 @@ Subdirectories will be set and populated as follows:
             libgen.scimag30200000-30200999
             libgen.scimag30201000-30201999
             libgen.scimag30202000-30202999
+        ...
     Reference_Databases
         libgen_scimag
         scihub
         unpaywall
             unpaywall_snapshot_2021-07-02T151134.jsonl.gz
             unpaywall_snapshot_2021-07-02T151134.jsonl
-            xaa
-            xaa.pkl
-            xab
-            xab.pkl
-            ...
-    Torrenfiles
+            splitted
+                xaa
+                xaa.pkl
+                xab
+                xab.pkl
+                ...
+    Torrentfiles
         sm_00000000-00099999
         sm_00100000-00199999
         sm_00200000-00299999
@@ -222,7 +224,6 @@ By default a file which gets deleted on the NAS is transferred into the recyle b
 
 # 8) Download of reference database
 Database dump from unpaywall.org (After filling a form a link is created)
-
 
     wget https://unpaywall-data-snapshots.s3.us-west-2.amazonaws.com/unpaywall_snapshot_2021-07-02T151134.jsonl.gz
 
