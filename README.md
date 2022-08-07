@@ -1,31 +1,39 @@
 # 1) About SciView
-This repository offers a  framework based on a Synology NAS system, WSL and Python software in odrer to dowload, process and visualize terabytes of fulltext scientific articles. WSL is utilized in order to download, transform and sort scientific publications and reference databases. Python is used in order enable NLP functionalities and textmining workflows.
+This repository offers a framework based on a Synology NAS system, WSL and Python in order to dowload, process and visualize terabytes of fulltext scientific articles. WSL is utilized to download, transform and sort scientific publications and reference databases. Python is used in a Jupyter Notebook to enable NLP functionalities and textmining workflows.
 
 The goal of this project can be described along the following points:
 * Support the cause of [library genesis](https://en.wikipedia.org/wiki/Library_Genesis)
-    * If you seek to support this or similar in the same manner be aware of any legal consequency which vary depending on ISP and country you live in
+    * If you seek to support this or similar in the same manner be aware of any legal consequency which vary depending on ISP and country you live in!
 * Store and process terabytes of data with own hardware
 * Create NLP models based on available data and reference databases
 * Create a webbased visualzation tool for navigation millions of publications
 * Write a blog about the insights and learning of this project
 
-The repository itself consists of two different projects; the knowledge base describing the process and insights of this project and the actual repository for implementation.
+The repository itself consists of two different projects; the knowledge base (Blog articles) describing the process and insights of this project and the actual repository for implementation.
 
-## 1.1) SciView Framework
+**Knowledge and Blog**
+
+Accompanied to this repository blog articles are and will be written. The posts themself are also contained in this repository and the [main section](/Knowledge%20and%20Blog/SciView_Main.md) is the starting point of those posts.
+
+**SciView Framework**
+
 The actual framwork encompasses the following files:
 
-* **README.md** -> Information about the repository, project and guide for set up with own hardware.
-* **scidb** -> A collection of various function enabling the transformation of the downloaded publication data.
-* **env** -> Path defined which are used in scidb functions
-* **SciView.ipynb** -> Notebook about NLP workflows implemented with Python
-* **modelConfig_0_99.py** -> Configuration file for generating models and corresponding data
-* **test_envrionment.py** -> A bag of test code and other snippets
+* README.md
+    * Information about the repository, project and guide for set up with own hardware.
+* scidb
+    * A collection of various function enabling the transformation of the downloaded publication data.
+* env
+    * Path defined which are used in scidb functions
+* SciView.ipynb 
+    * Notebook about NLP workflows
+* modelConfig_0_99.py 
+    * Configuration file for generating models and corresponding data
+* test_envrionment.py
+    * A bag of test codes and other snippets
 
+**Imporant Notice**
 
-## 1. 2) Knowledge and Blog
-As part this project several blog articles are written at it is best to start with the [Main section](/Knowledge%20and%20Blog/SciView_Main.md)
-
-## 1.3) Imporant Notice
 Read before continuation!
 
     Currently the directory and device naming should be followed in order successfully run the scidb commands. As of writing this, no functionality is implemented in order to automatically create the corresponding directories, settings on the NAS system and programming envrionment. So the following implementation steps should be seen as an example of how to implement the framework functionalities.
@@ -61,7 +69,7 @@ As mentioned above the directory structure should be followed because of some ha
 * **Data**
     * Contains up to 100'000 text files in each subdirectory. Each subdirectory is based on the torrent identifier (000 -> 9XX). The corresponding pdf file (which has been transformed to a text file) are storred in the same corresponding directory before deletion.
 * **IntermediateData**
-    * This directory contains various data files indexed by the torrent identifier. Examples for such files is the NNN_FtPr.pkl file, which contains the tokenized and preprocessed text data (see text files in the Data directory) or the NNN_MetaDataFilered.pkl file which is a dataframe storing metadata from the preprocessing step.
+    * This directory contains various data files indexed by the torrent identifier. Examples for such files is the NNN_FtPr.pkl file, which contains the tokenized and preprocessed text data (see text files in the Data directory) or another example is the NNN_MetaDataFilered.pkl file which is a dataframe storing metadata from the preprocessing step.
 * **Models**
     * Throughout the NLP model building various files are generated representing either models or data structures used for further applications.
 * **RawData**
@@ -130,7 +138,7 @@ Subdirectories will be set and populated as follows:
 
 
 # 4) Mounting of Synology network drive
-In order to programmatically access the data the synology NAS has to be configured accordingly. The unix based commands access the data through mounting of the already, in the windows explorer, mounted network drive. Therefore the first step is it to mount the network drive in windows, also python code acesses the through this mount.
+In order to programmatically access the data the synology NAS has to be configured accordingly. The unix based commands access the data through mounting of the already, in the windows explorer, mounted network drive. Therefore the first step is it to mount the network drive in windows, also python code acesses the files and folders through this mount.
 
 ## 4.1) Windows network drive mount
 Reference Link: [Create a network drive mount in windows](https://basic-tutorials.de/synology-netzlaufwerk-im-windows-explorer-einbinden/)
@@ -148,7 +156,7 @@ Prerequisite: NAS is already setup and directly interfaced through ehternet to t
 ## 4.2) Drive mount in WSL-2
 Reference Link: [Mount network drive in WSL](https://docs.microsoft.com/en-us/archive/blogs/wsl/file-system-improvements-to-the-windows-subsystem-for-linux)
 
-Prerequisite: The network folder is mounted at /mnt/share and therefore the "share" directory has to be first created.
+Prerequisite: The network folder will be mounted at /mnt/share and therefore the "share" directory has to be created first.
 
 The mounting of the windows network drive into WSL is done by applying
 
@@ -157,21 +165,21 @@ The mounting of the windows network drive into WSL is done by applying
 This command is part of the scidb commands and invoked automatically with other commands.
 
 # 5) Download and intiate torrent files
-The currently implemented function dowloads all torrent files from [Torrent Repo](http://libgen.rs/scimag/repository_torrent/) from the 0th to the 875th file and stores it in a specified folder.
+The currently implemented function downloads all torrent files from [Torrent Repo](http://libgen.rs/scimag/repository_torrent/) from the 0th to the 875th file and stores it in the specified folder.
 
 ## 5.1) Configuration of the download station application
-Before adding torrents for download to the download station application the program has to be configured first
+Before adding torrents for download to the download station application the program has to be configured first.
 
-1. Open the synology web interface and open the "Download Station" application (Install if not available)
+1. Open the synology web interface and open the "Download Station" application (Install it if not available)
 2. Click "Settings" symbol on the bottom left
 3. Navigate to the "Location" tab on the sidebar and select the following path for Destination: "ScimagDir/RawData"
 4. Navigate to the "Auto Extract" tab on the sidebar
-5. Tick "Enable Auto Extract.." and chose "Extract to", also select the following path: "SciMagDir/Data"
-6. Optional define a download schedule in the "General" tab at the sidebar
+5. Tick "Enable Auto Extract.." and chose "Extract to", select the following path: "SciMagDir/Data"
+6. Optional: define a download schedule in the "General" tab at the sidebar
 
 
 ## 5.2) Download and start torrent files
-In order to download
+In order to download files based on torrents:
 
 1. Check the torrent path in the env file (default: TORRENT_PATH=/mnt/share/Torrentfiles)
 2. Execute
@@ -179,12 +187,12 @@ In order to download
         scidb torrentdl
 
 3. Open the synology web interface and navigate into the directory containing the torrent files
-4. Select one or more torrent file, righ click and then select "Add to download station"
-5. Check if the download has started in the "Download Station" Application
-6. Continuously check if the files have been correctly donwloaded and extraceted to the above defined paths
+4. Select one or more torrent files, right click and then select "Add to download station"
+5. Check if the download has started in the "Download Station" application
+6. Continuously check if the files have been correctly downloaded and extracted to the above defined paths
 
 ## 5.3) Unzip the files manually
-The scidb command suite offers a command for extraction of the zipped downloaded file which can be utilized like:
+The scidb command suite offers a command for extraction of the downloaded zip files, which can be utilized like:
 
     scidb dlunzip 001 050
 
@@ -192,7 +200,7 @@ This command has to be executed as root user!
 
 
 # 6) PDF to text
-In order to transform the pdf content to text the "pdftotext" function from the poppler-utils library is used. This [link](https://www.cyberciti.biz/faq/converter-pdf-files-to-text-format-command/) describes the installation of the package and an example of published usage of this tools is given in this [article](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005962)
+In order to transform the pdf content to text ,the "pdftotext" function from the poppler-utils library is used. This [link](https://www.cyberciti.biz/faq/converter-pdf-files-to-text-format-command/) describes the installation of the package and an example of published usage of this tools is given in this [article](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005962)
 
 The following command example allows the transformation of pdf into a text file and mantaining the DOI as the name of the file itself
 
@@ -209,18 +217,18 @@ After translating the pdf into text files the pdf files are not used anymore. Th
 With the scidb overview command one can then check if all pdf files have been removed. Remaining pdf files can be manually deleted through a ".pdf" search in the file station application on the synology NAS webinterface.
 
 ## 7.2) Renaming textfiles
-The tranlation of pdf into textfiles sometimes generates file endings such as ".pdf.text". This pattern can be detected after removing of pdf files and still see a lot of documents with the scidb overview function. In order to rename these files the following command can be applied:
+The translation of pdf into textfiles sometimes generates file endings such as ".pdf.text". This pattern can be detected after removing of pdf files and still see a lot of documents with the scidb overview function. In order to rename these files the following command can be applied:
 
     scidb rntext 000 050
 
 ## 7.3) Removing zip files
-If a torrent is finished and will not be continued it can be deleted. After deletion of the torrent also the download zip files can be removed (usually after unzipping and tranlating pdf to text files). For zip file deletion the following command can be used:
+If a torrent is finished and will not be continued it can be deleted. After deletion of the torrent also the download zip files can be removed (usually after unzipping and translating pdf to text files). For zip file deletion the following command can be used:
 
     scidb rmzip 000 050
 
 
 ## 7.4) Important notice on deleting files on the NAS
-By default a file which gets deleted on the NAS is transferred into the recyle bin (Recycle bin directory is autmatically generated in the shared NAS folder). So in order to gain unused storage the recycle bin has to be continuously emptied!
+By default a file which gets deleted on the NAS is transferred into the recyle bin (Recycle bin directory is autmatically generated in the shared NAS folder). So in order to gain unused storage back the recycle bin has to be continuously emptied!
 
 # 8) Download of reference database
 Database dump from unpaywall.org (After filling a form a link is created)
@@ -229,6 +237,12 @@ Database dump from unpaywall.org (After filling a form a link is created)
 
 
 # 9) Jupyter Notebook
+Up to the creation of the text files based on the scientific publications in pdf format everything is processed with unix commands and libraries. The subsequent textmining and NLP applications have been implement with Python in a Jupyter Notebook. Of course the content of the notebook are further explained in the notebook itself and therefore only the main chapters are explained here shortly for overview purposes:
 
-
-
+1. Digital object identifier (DOI) - filepath dictionaries
+    * In order to access the textfiles the DOI has been chosen as a key to find the corresponding text file. Because the files have been stored in different folders a dictionary is setup with the DOI as keys and the file paths as values.   
+2. Preprocess and model building of millions of documents
+    * The model building consists of a phrase model, term-frequency dicitonary, bag of words model and the LDA model. All of it is implemented with Gensim and its data streaming capabilities.
+3. Inspect Dictionary and LDA model
+    * The resulting LDA model is investigated and knowledge and interesting plots are extracted and created.
+4. ...
