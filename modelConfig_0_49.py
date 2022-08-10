@@ -5,9 +5,14 @@ IntermediateData_Path="Y:\\IntermediateData\\"
 FtPr_Suffix="_FtPr.pkl"
 MetaData_Suffix="_MetaData.pkl"
 
+
 # Define output path and file names
 #-------------------------------------------
 Model_Path="Y:\\Models\\"
+
+# Preprocessing
+DOIPath_Suffix="_DOI_Path_Dict.pkl"
+EncodeError_Suffix="_errEnc.pkl"
 
 # Phrases Bigram
 InterSavePhrases_Suffix="_InterSaveBigram.pkl"

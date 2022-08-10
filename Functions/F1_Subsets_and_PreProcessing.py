@@ -11,6 +11,8 @@ from nltk.stem import PorterStemmer # or LancasterStemmer, RegexpStemmer, Snowba
 from nltk.stem import WordNetLemmatizer 
 nltk.download('punkt')
 nltk.download('stopwords')
+nltk.download('wordnet')
+nltk.download('omw-1.4')
 stemmer = PorterStemmer()
 stop_words = stopwords.words('english') # or any other list of your choice
 lemmatizer = WordNetLemmatizer()
@@ -157,13 +159,22 @@ def Preprocessed_Dict_and_Metadata(doiPathDict):
             # Do the preprocessing
             FtToPr=Preprocess_Token_List(FtTo,minlength,maxlength)
 
-            # Append MetaData
-            MetaData=MetaData.append(pd.DataFrame([[doi,len(FtToPr),language]],
-                        columns=["DOI","Token Amount", "Language"]),ignore_index = True)
+            # # Append MetaData
+            # MetaData=MetaData.append(pd.DataFrame([[doi,len(FtToPr),language]],
+            #             columns=["DOI","Token Amount", "Language"]),ignore_index = True)
+            
+            # Create MetaDataframe for appending to the MetaData Dataframe
+            data={"DOI":doi,"Token Amount":len(FtToPr),"Language":language}
+            MetaDf=pd.DataFrame(data,columns=["DOI","Token Amount", "Language"])
+
+            #Concatenate the MetaDf to the MetaData Dataframe
+            MetaData=pd.concat([MetaData,MetaDf],axis=0)
+
             # Append Preprocessed texts as dictionary
             FtPr[doi]=FtToPr
 
         except:
+            print("Exception thrown!" + path)
             encodingError[doi]=path
         
         if iterCount % 2000 == 0: 
