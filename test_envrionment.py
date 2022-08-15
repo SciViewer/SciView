@@ -3,6 +3,7 @@ import csv
 from turtle import shape
 from itsdangerous import json
 from nbformat import read
+import openpyxl
 from pyLDAvis import js_PCoA
 import unidecode
 
@@ -2075,9 +2076,17 @@ import dask.dataframe as dd
 import pandas as pd
 import os
 import time
+import pickle
+from Functions.F3_Reference_Databases_and_Alignment import CleanJoinedDf
+
+from modelConfig_0_99 import *
 
 path='Y:\\Reference_Databases\\unpaywall\\splitted_old'
-csvPath='Y:\\Reference_Databases\\unpaywall\\xaa-xew.csv'
+csvPath='Y:\\Reference_Databases\\unpaywall\\xaa-xba.csv'
+MetaDataJoined_Suffix="_MetaDataJoined.pkl"
+LengthInfoDf_Suffix="_LengthInfoDf.pkl"
+LengthInfoDf_Suffix2="_LengthInfoDf2.csv"
+
 
 # Get a list off all the unpaywall metadata .pkl files
 fileNameList=os.listdir(path)
@@ -2097,52 +2106,231 @@ for name in fileNameList[1::]:
     df.to_csv(csvPath, mode='a', index=False, header=False)
     print(name, "is appended")
 
+
+
 # Read the created csv file with dask
-df=dd.read_csv(csvPath, assume_missing=True) #some year dates are missing !!!
+RefDf=dd.read_csv(csvPath, assume_missing=True) #some year dates are missing !!!
 
 # show the amount of dask partitions
-df.npartitions
+RefDf.npartitions
 
 # Compute head
-df.head(n=5, npartitions=1, compute=True)
+RefDf.head(n=5, npartitions=1, compute=True)
+
+# Get length of the RefDf dataframe with dask
+RefDf.shape[0].compute()
 
 
-# Load one of the preprocessed meta data files
-path='Y:\\IntermediateData\\040_MetaDataFiltered.pkl'
-df2=pd.read_pickle(path)
-df2.columns=["doi", "TokenAmount", "Language"]
+# Iterate trough every directory and load the corresponding metadta file
+StartDir=0
+EndDir=9
 
-# For every string the df2 doi column extract the row in the df dask dataframe which has the same doi
-join = df.merge(df2, how="inner", on=["doi"])
+# Iterate trough data directories
+for dirNum in range(StartDir,EndDir+1):
 
-# compute the join and time it
-tic = time.perf_counter()
-pandasdf=join.compute()
-pandasdf.columns
-toc = time.perf_counter()
-print(toc-tic) 
+    # Create path to dictionary and read the preprocessed metadata file
+    path=(IntermediateData_Path + str(dirNum).zfill(3) + MetaDataFiltered_Suffix)
+    PpMetaDf=pd.read_pickle(path)
+
+    #Harmonize Column Naming
+    PpMetaDf.columns=["doi", "TokenAmount", "Language"]
+
+    # Create inner join of the PpMetaDf and the RefDf
+    join = RefDf.merge(PpMetaDf, how="inner", on=["doi"])
+    tic = time.perf_counter()
+    JoinedDf=join.compute()
+    toc = time.perf_counter()
+    print(toc-tic) 
+
+    # # Get length of the joined dataframe
+    # JoinedDfLength=len(JoinedDf)
+    
+    # # Geth the amount of non unique value in the "title" column
+    # nonUniTitleList=list(JoinedDf["title"].value_counts().index[JoinedDf["title"].value_counts()>1])
+    # NonUniTitleAmount=len(nonUniTitleList)
+    # # Get the amount of unique values in the "doi" column
+    # nonUniDoiList=list(JoinedDf["doi"].value_counts().index[JoinedDf["doi"].value_counts()>1])
+    # NonUniDOIAmount=len(nonUniDoiList)
+    # # Remove all of the rows in the JoinedDf with titles which are not unique 
+    # JoinedDf_Cleaned_1=JoinedDf[~JoinedDf["title"].isin(nonUniTitleList)]
+    # # Count the amount of rows in the cleaned dataframe
+    # JoinedDfLength_afterTitleCleaning=len(JoinedDf_Cleaned_1)
+
+    # # Check if after removing non unique titles if there are still non unique dois
+    # nonUniDoiList=list(JoinedDf_Cleaned_1["doi"].value_counts().index[JoinedDf_Cleaned_1["doi"].value_counts()>1])
+    # NonUniDOIAmount_afterTitleCleaning=len(nonUniDoiList)
+    # # Remove all of the rows in the JoinedDf with dois which are not unique 
+    # JoinedDf_Cleaned_2=JoinedDf_Cleaned_1[~JoinedDf_Cleaned_1["doi"].isin(nonUniDoiList)]
+    # # Count the amount of rows in the cleaned dataframe
+    # JoinedDfLength_afterDOICleaning=len(JoinedDf_Cleaned_2)
+
+    # # Get the amount on NaN values in the "title" column
+    # NaNasTitleList=list(JoinedDf_Cleaned_2["doi"][JoinedDf_Cleaned_2["title"].isna()==True])
+    # NaNasTitleAmount=len(NaNasTitleList)
+    # # Remove all of the rows in the JoinedDf with titles which are NaN
+    # JoinedDf_Cleaned_3=JoinedDf_Cleaned_2[~JoinedDf_Cleaned_2["doi"].isin(NaNasTitleList)]
+    # # Count the amount of rows in the cleaned dataframe
+    # JoinedDfLength_afterNaNTitleCleaning=len(JoinedDf_Cleaned_3)
 
 
-# # check if the "title" column only has unique values
-# df3["title"].nunique()
+    # # Get the amount of NaN vlaues in the "year" column of the joined dataframe
+    # NaNasYearList=list(JoinedDf_Cleaned_3["doi"][JoinedDf_Cleaned_3["year"].isna()==True])
+    # NaNasYearAmount=len(NaNasYearList)
+    # # Remove all of the rows in the JoinedDf with years which are NaN
+    # JoinedDf_Cleaned_4=JoinedDf_Cleaned_3[~JoinedDf_Cleaned_3["doi"].isin(NaNasYearList)]
+    # # Count the amount of rows in the cleaned dataframe
+    # JoinedDfLength_afterNaNYearCleaning=len(JoinedDf_Cleaned_4)
 
-# # check if "doi" column only has unique values
-# df3["doi"].nunique()
+    # # Turn the year values in the "year" column into integers
+    # JoinedDf_Cleaned_4["year"]=JoinedDf_Cleaned_4["year"].astype(int)
 
-# # Get an example of title which comes up more than once
-# df3["title"].value_counts().head(100)
+    # # Creat path to the _DOI_Path_Dict.pkl file based on the current dirNum and then load it
+    # path=(IntermediateData_Path + str(dirNum).zfill(3) + DOIPath_Suffix)
+    # DOI_Path_Dict=pickle.load(open(path, "rb"))
+    # # Create a new column in the JoinedDf_Cleaned_4 dataframe which contains the paths to the raw textfiles based on the doi
+    # JoinedDf_Cleaned_4["text_path"]=JoinedDf_Cleaned_4["doi"].map(DOI_Path_Dict)
 
-# # Get a list of non unique values of the "title" column of the df3 dataframe
-# nonUniTitleList=list(df3["title"].value_counts().index[df3["title"].value_counts()>1])
-# len(nonUniTitleList)
-# nonUniTitleList[-1]
-# df3[df3["title"]=="Transformations of sugars in alkaline solutions"]
+    # # Rename the "TokenAmount" column to "token_amount" and the "Language" column to "language"
+    # JoinedDf_Cleaned_4.rename(columns={"TokenAmount": "token_amount", "Language": "language"}, inplace=True)
 
-# # Drop every row if the corresponding title value is in the nonUniTitleList
-# df4=df3[~df3["title"].isin(nonUniTitleList)]
+    # # Check each column for the amount of missing values
+    # MissingValues=JoinedDf_Cleaned_4.isna().sum().sum()
 
-# # Check if the new dataframe now has unique values in the "title" column
-# df4["title"].nunique()
+    # JoinedDfLength # Length of the original joined dataframe
+    # NonUniTitleAmount # Amount of non unique titles
+    # NonUniDOIAmount # Amount of non unique dois
+    # JoinedDfLength_afterTitleCleaning # Length of the dataframe after removing non unique titles
+    # NonUniDOIAmount_afterTitleCleaning # Amount of non unique dois after removing non unique titles
+    # JoinedDfLength_afterDOICleaning # Length of the dataframe after removing non unique dois
+    # NaNasTitleAmount # Amount of NaN values in the title column
+    # JoinedDfLength_afterNaNTitleCleaning # Length of the dataframe after removing NaN values in the title column
+    # NaNasYearAmount # Amount of NaN values in the year column
+    # JoinedDfLength_afterNaNYearCleaning # Length of the dataframe after removing NaN values in the year column
+    # MissingValues # Amount of missing values in the dataframe
+
+
+    # # Save the Length and amount information to a dataframe and save it to a pickle file. The column name are the corresponding comments above.
+    # LengthInfoDf=pd.DataFrame({"Directory Num": [dirNum],
+    #                             "Length df": [JoinedDfLength],
+    #                             "non unique titles": [NonUniTitleAmount],
+    #                             "non unique dois": [NonUniDOIAmount],
+    #                             "Length df after title cleaning": [JoinedDfLength_afterTitleCleaning],
+    #                             "non unique dois after title cleaning": [NonUniDOIAmount_afterTitleCleaning],
+    #                             "Length df after doi cleaning": [JoinedDfLength_afterDOICleaning],
+    #                             "NaN title values": [NaNasTitleAmount],
+    #                             "Length df after NaN title cleaning": [JoinedDfLength_afterNaNTitleCleaning],
+    #                             "NaN year values": [NaNasYearAmount],
+    #                             "Length df after NaN year cleaning": [JoinedDfLength_afterNaNYearCleaning],
+    #                             "Total NaN in df": [MissingValues]})
+
+    # Apply the CleanJoinedDf function to the dataframe
+    LengthInfoDf, JoinedDf_Cleaned_4=CleanJoinedDf(JoinedDf, IntermediateData_Path, dirNum, DOIPath_Suffix)
+
+    # Concatenate the LengthInfoDf with itself to create a dataframe with all the information if it is the first iteration
+    if dirNum==StartDir:
+        LengthInfoDf_All=LengthInfoDf
+    else:
+        LengthInfoDf_All=pd.concat([LengthInfoDf_All, LengthInfoDf], axis=0)
+
+    # Save the joined and cleaned dataframe to a pickle file
+    path=(IntermediateData_Path + str(dirNum).zfill(3) + MetaDataJoined_Suffix)
+    JoinedDf_Cleaned_4.to_pickle(path)
+    print(path, "is saved")
+
+    print("Directory ", dirNum, "is done")
+
+# Save the LengthInfoDf to a pickle file
+path=(IntermediateData_Path + str(StartDir).zfill(3) + "_" + str(EndDir).zfill(3) + LengthInfoDf_Suffix)
+LengthInfoDf_All.to_pickle(path)
+print(path, "is saved")
+
+# Save the LengthInfoDf to a csv file (without index)
+path=(IntermediateData_Path + str(StartDir).zfill(3) + "_" + str(EndDir).zfill(3) + LengthInfoDf_Suffix2)
+LengthInfoDf_All.to_csv(path, index=False)
+
+-------------- # Check if RefDb has double entries
+
+doi="10.1002/(sici)1099-1387(199907)5:7<313::aid-psc200>3.0.co;2-f"
+# Find the row in the RefDf dataframe which has the same doi as the doi variable
+RefDf[RefDf["doi"]==doi].compute()
+#                                                       doi    year  is_oa publisher                journal_name            genre                                              title
+# 1043    10.1002/(sici)1099-1387(199907)5:7<313::aid-ps...  1999.0  False     Wiley  Journal of Peptide Science  journal-article  Assembly of binding loops on aromatic template...
+# 244097  10.1002/(sici)1099-1387(199907)5:7<313::aid-ps...  1999.0  False     Wiley  Journal of Peptide Science  journal-article  Assembly of binding loops on aromatic template...
+
+--------------
+
+
+# Test if the text files can be accessed
+#----------------------------------------
+
+# Load three of the of the saved joined and cleaned dataframes
+path='Y:\\IntermediateData\\002_MetaDataJoined.pkl'
+df5=pd.read_pickle(path)
+
+import numpy as np
+
+# Get the doi and data_dir value of the same random row  
+random_index=np.random.randint(0,len(df5))
+df5.iloc[random_index]
+doi=df5.iloc[random_index]["doi"]
+data_dir=df5.iloc[random_index]["data_dir"]
+
+# Encode the doi string similar to URL encoding
+# 'Y:\\Data\\00200000\\10.1002\\1521-4095(200110)13:20<1541::aid-adma1541>3.0.co;2-x.txt' ->  'Y:\\Data\\00200000\\10.1002\\1521-4095%28200110%2913%3A20%3C1541%3A%3Aaid-adma1541%3E3.0.co%3B2-x.txt'
+import urllib.parse
+doi_encoded=urllib.parse.quote(doi)
+doi_encoded
+
+# Create a path to the text file with the doi and data_dir value
+path=("Y:\\Data\\" + str(data_dir).zfill(3) + "00000\\" + doi_encoded + ".txt").replace("/", "\\")
+# Print the first 100 characters of the text file
+with open(path, "r", encoding="utf8") as f:
+    print(f.read(100))
+
+# Load the file through loading the dictionary
+
+# Load the _DOI_Path_Dict.pkl file
+path='Y:\\IntermediateData\\002_DOI_Path_Dict.pkl'
+DOI_Path_Dict=pd.read_pickle(path)
+path2=DOI_Path_Dict[doi]
+
+# Print the first 100 characters of the text file
+with open(path2, "r", encoding="utf8") as f:
+    print(f.read(300))
+
+# Ft=open(path, "r", encoding="utf8").read()
+
+
+
+
+
+
+
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# Concatenate all of the aligned and cleaned joined dataframes into a single one
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -28,6 +28,7 @@ As mentioned above the directory structure should be followed because of some ha
     * Models
     * RawData
     * Reference_Databases
+    * SciView_Datasets
     * Torrentfiles
 
 ## 3.2) Directory explanations and population example
@@ -42,6 +43,8 @@ As mentioned above the directory structure should be followed because of some ha
     * The compressed file resulting from the torrent download are stored in this directory. The content is meant to be unzipped and can be left for further seeding (e.g. torrent checks this location)
 * **Reference_Databases**
     * The main reference databases currently used is the data dump from unpaywall
+* **SciView_Datasets**
+    * Aggregated and final datasets for other models are stored in this directory.
 * **Torrentfiles**
     * Torrent files are managed in this directory
 
@@ -96,6 +99,9 @@ Subdirectories will be set and populated as follows:
                 xab
                 xab.pkl
                 ...
+    SciView_Datasets
+        000_049_SciView_Dataset.pkl
+        ...
     Torrentfiles
         sm_00000000-00099999
         sm_00100000-00199999

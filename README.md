@@ -5,7 +5,7 @@
 This repository offers a framework based on a Synology NAS system, WSL and Python in order to dowload, process and visualize terabytes of fulltext scientific articles. WSL is utilized to download, transform and sort scientific publications and reference databases. Python is used in a Jupyter Notebook to enable NLP functionalities and textmining workflows.
 
 The goal of this project can be described along the following points:
-* Support the cause of [library genesis](https://en.wikipedia.org/wiki/Library_Genesis)
+* Support the cause of [Library Genesis](https://en.wikipedia.org/wiki/Library_Genesis) and [Unpaywall]()
     * If you seek to support this or similar in the same manner be aware of any legal consequency which vary depending on ISP and country you live in!
 * Store and process terabytes of data with own hardware
 * Create NLP models based on available data and reference databases
@@ -16,7 +16,7 @@ The repository itself consists of two different projects; the knowledge base (Bl
 
 **Knowledge and Blog**
 
-Accompanied to this repository blog articles are and will be written. The posts themself are also contained in this repository and the [main section](/Knowledge%20and%20Blog/SciView_Main.md) is the starting point of those posts.
+Accompanied to this repository blog articles are and will be written. The posts themself are also contained in this repository and the [**Main Section**](/Knowledge%20and%20Blog/SciView_Main.md) is the starting point of those posts.
 
 
 **SciView Framework**
@@ -39,10 +39,11 @@ The actual framwork encompasses the following files:
 # Generate dataset and process Jupyter Notebook
 SciView is a collection of a dataset and corresponding analysis of it through NLP applications enabled in a Jupyter Notebook. 
 
-The [**Guide to dataset Generation**](Guide_Dataset_Generation.md) contains the following topics:
+The [**Guide to dataset Generation**](/Knowledge%20and%20Blog/Guide_Dataset_Generation.md) contains the following topics:
 * Generating the Scieview dataset with functions and workflows enabled in Unix and Python
 * An Overview on the content of Jupyter Notebook
 
 # ToDo
 [ ] Clean up Jupyter Notebook
-[ ] 
+[ ] Comment all of the functions
+[ ] Finish Chapter 3 then

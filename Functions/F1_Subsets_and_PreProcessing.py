@@ -25,9 +25,14 @@ import pandas as pd
 
 
 def DOI_Path_Dictionary(dirNum, dataPath):
+
     '''
-    Based on the number of the directory and path to those directories a dictionary is created with keys as DOIs and the corresponding Path to this file as values.
+    This function creates a dictionary of the form {doi:path}
+        Input: dirNum - the number of the directory to be read
+                dataPath - the path to the directory
+        Output: interDict - the dictionary of the form {doi:path}
     '''
+
     # Init dict
     doiPathDict={}
 
@@ -56,6 +61,13 @@ def DOI_Path_Dictionary(dirNum, dataPath):
 
 def Random_DOI_Path_Pair(doiPathDict):
 
+    '''
+    This function creates a random pair of doi and path
+        Input: doiPathDict - the dictionary of the form {doi:path}
+        Output: doi - the random doi
+                path - the random path
+    '''
+
     # Get random dictionary pair in dictionary
     # Using random.choice() + list() + items()
     res = key, val = random.choice(list(doiPathDict.items()))
@@ -72,6 +84,14 @@ def Random_DOI_Path_Pair(doiPathDict):
 
 
 def Chunks(data, SIZE):
+    
+    '''
+    This function splits a list into chunks of a certain size
+        Input: data - the list to be split
+                SIZE - the size of the chunks
+        Output: data - the list split into chunks of the size SIZE
+    '''
+
     it = iter(data)
     for i in range(0, len(data), SIZE):
         yield {k:data[k] for k in islice(it, SIZE)}
@@ -79,6 +99,15 @@ def Chunks(data, SIZE):
 
 
 def Preprocess_Token_List(tokenList,minlength,maxlength):
+
+    '''
+    This function preprocesses a list of tokens
+        Input: tokenList - the list of tokens to be preprocessed
+                minlength - the minimum length of the tokens
+                maxlength - the maximum length of the tokens
+        Output: tokenList - the preprocessed list of tokens
+    '''
+
     # lowercase
     tokenList=[token.lower() for token in tokenList]
 
@@ -114,6 +143,13 @@ def Preprocess_Token_List(tokenList,minlength,maxlength):
 
 def Preprocessed_Dict_and_Metadata(doiPathDict):
 
+    '''
+    This function preprocesses the dictionary and creates a metadata dictionary
+        Input: doiPathDict - the dictionary of the form {doi:path}
+        Output: interDict - the preprocessed dictionary 
+                metadata - the metadata dictionary
+    '''
+    
     # Start Global Timer which times the whole function
     tic = time.perf_counter()
 
@@ -194,6 +230,15 @@ def Preprocessed_Dict_and_Metadata(doiPathDict):
 
 
 def Dict_Loader(dirNum, doiPath_Path, doiPath_Suffix):
+
+    '''
+    This function loads the dictionary of the form {doi:path}
+        Input: dirNum - the number of the directory to be loaded
+                doiPath_Path - the path to the directory
+                doiPath_Suffix - the suffix of the files in the directory
+    Output: doiPathDict - the dictionary of the form {doi:path}
+    '''
+    
     # Bring for example 27 into the form of "027"
     dirNum=str(dirNum).zfill(3)
 
