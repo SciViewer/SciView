@@ -43,6 +43,14 @@ The [**Guide to dataset Generation**](/Knowledge%20and%20Blog/Guide_Dataset_Gene
 * Generating the Scieview dataset with functions and workflows enabled in Unix and Python
 * An Overview on the content of Jupyter Notebook
 
+# Setting up Python envrionment
+
+An Anaconda Python 3.7.11 environment is set up and the installed package verrsions haven been exported to a yaml file with the following command
+
+    conda env export > C:\Users\Public\Documents\SciView_env.yaml
+
+The corresponding [**yaml**](SciView_env.yaml) file can be imported to in Anaconda. (It is recommended to use this enviroment. An example for possible problems with newer Python or package versions is the Pickle protocol version which can change depending on the version of Python.)
+
 # ToDo
 [ ] Clean up Jupyter Notebook
 [ ] Comment all of the functions

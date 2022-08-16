@@ -21,7 +21,7 @@ MetaData_Suffix="_MetaData.pkl"
 encodeError_Suffix="_errEnc.pkl"
 
 # Set the dirs to save doi and paths
-StartDir=250
+StartDir=175
 EndDir=299
 
 #----------------------------------------#

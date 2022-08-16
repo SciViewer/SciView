@@ -1,7 +1,9 @@
 import chunk
 import csv
 from turtle import shape
+from importlib_metadata import files
 from itsdangerous import json
+import matplotlib
 from nbformat import read
 import openpyxl
 from pyLDAvis import js_PCoA
@@ -2302,6 +2304,174 @@ with open(path2, "r", encoding="utf8") as f:
 
 
 
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# Create dataframe for the Sankey Diagram
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+import dask.dataframe as dd
+import plotly.graph_objects as go
+import plotly.express as pex
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+compressed_pdf_files # Amount of compressed pdf files for each directory
+unzipping_and_pdf2text_loss # Amount of unzipping and pdf2text loss for each directory
+text_files # Amount of text files for each directory
+preprocessing_loss # Amount of preprocessing loss for each directory
+preprocessed_files # Amount of preprocessed files for each directory
+filtering_loss # Amount of filtering loss for each directory
+filtered_files # Amount of filtered files for each directory
+alignment_loss # Amount of alignment loss for each directory
+aligned_files # Amount of aligned files for each directory
+ref_db_files # Amount of entries in the reference database
+
+
+# Define start and end directory
+StartDir=0
+EndDir=10
+
+# Create an empty dataframe to store the information for each directory
+SankeyDf=pd.DataFrame(columns=["dirNum","compressed_pdf_files", "unzipping_and_pdf2text_loss", "text_files", "preprocessing_loss", "preprocessed_files", "filtering_loss", "filtered_files", "alignment_loss", "aligned_files", "ref_db_files"])
+
+# The amount of compressed pdf files for each directory is always 100000
+compressed_pdf_files=100000
+
+# The amount of ref_db_files can be calculated by checking the length of the xaa-xba.csv file (Read the file with Dask)
+path='Y:\\Reference_Databases\\unpaywall\\xaa-xba.csv'
+ref_db_files=len(dd.read_csv(path))
+
+# Loop over the directories
+for dirNum in range(StartDir, EndDir+1):
+
+    # The amount of text files can be calulated by counting the number entries in the 000_DOI_Path_Dict.pkl dictionary
+    path='Y:\\IntermediateData\\' + str(dirNum).zfill(3) +'_DOI_Path_Dict.pkl'
+    DOI_Path_Dict=pd.read_pickle(path)
+    text_files=len(DOI_Path_Dict)
+
+    # The amount of unzipping_and_pdf2text_loss can be calculated by subtracting the amount of text_files from the amount of compressed_pdf_files
+    unzipping_and_pdf2text_loss=compressed_pdf_files-text_files
+
+    # The amount of preprocessed_files can be calculated by checking the length of the 000_MetaData.pkl dataframe
+    path='Y:\\IntermediateData\\' + str(dirNum).zfill(3) +'_MetaData.pkl'
+    MetaData=pd.read_pickle(path)
+    preprocessed_files=len(MetaData)
+
+    # The amount of preprocessing_loss can be calculated by subtracting the amount of preprocessed_files from the amount of text_files
+    preprocessing_loss=text_files-preprocessed_files
+
+    # The amount of filered_files can be calculated by checking the length of the 000_MetaData_Filtered.pkl dataframe
+    path='Y:\\IntermediateData\\' + str(dirNum).zfill(3) +'_MetaDataFiltered.pkl'
+    MetaData_Filtered=pd.read_pickle(path)
+    filtered_files=len(MetaData_Filtered)
+
+    # The amount of filtering_loss can be calculated by subtracting the amount of filtered_files from the amount of preprocessed_files
+    filtering_loss=preprocessed_files-filtered_files
+
+    # The amount of aligned_files can be calculated by checking the length of the 000_MetaDataJoined.pkl dataframe
+    path='Y:\\IntermediateData\\' + str(dirNum).zfill(3) +'_MetaDataJoined.pkl'
+    MetaDataJoined=pd.read_pickle(path)
+    aligned_files=len(MetaDataJoined)
+
+    # The amount of alignment_loss can be calculated by subtracting the amount of aligned_files from the amount of filtered_files
+    alignment_loss=filtered_files-aligned_files
+
+    # Append the information for each directory to the dataframe
+    SankeyDf.loc[dirNum]=[dirNum, compressed_pdf_files, unzipping_and_pdf2text_loss, text_files, preprocessing_loss, preprocessed_files, filtering_loss, filtered_files, alignment_loss, aligned_files, ref_db_files]
+
+# Save the dataframe to a csv file
+SankeyDf.to_csv("Y:\\IntermediateData\\SankeyDf.csv")
+
+# # Calculate the sum of each column in the SankeyDf except for the ref_db_lines and dirNum column and show it as a bar plot
+# SankeyDf.sum(axis=0)[["compressed_pdf_files", "unzipping_and_pdf2text_loss", "text_files", "preprocessing_loss", "preprocessed_files", "filtering_loss", "filtered_files", "alignment_loss", "aligned_files"]].plot(kind="bar")
+# # Make enough space in order that the x-axis labels are not cut off
+# plt.tight_layout()
+# # Show the plot
+# plt.show()
+
+
+# Calculate the sum of each column in the SankeyDf except for the ref_db_lines and dirNum column and assign it to a new dataframe
+SankeyDfSum=SankeyDf.sum(axis=0)[["compressed_pdf_files", "unzipping_and_pdf2text_loss", "text_files", "preprocessing_loss", "preprocessed_files", "filtering_loss", "filtered_files", "alignment_loss", "aligned_files"]]
+
+source_dest = [
+    ["compressed_pdf_files", "text_files"], # 1
+    ["compressed_pdf_files", "unzipping_and_pdf2text_loss"], # 2
+    ["text_files", "preprocessed_files"], # 3
+    ["text_files", "preprocessing_loss"], # 4
+    ["preprocessed_files", "filtered_files"], # 5
+    ["preprocessed_files", "filtering_loss"], # 6
+    ["filtered_files", "Alignment_step"], # 7
+    ["ref_db_files", "Alignment_step"], # 8
+    ["Alignment_step", "aligned_files"], # 9
+    ["Alignment_step", "alignment_loss"] # 10
+]
+
+SankePlotDf = pd.DataFrame(source_dest, columns=["Source", "Dest"])
+
+#---------------------------------------------------1-------------------------------2-----------------------------------3-------------------------------------4-------------
+SankePlotDf["Count"] = np.array([SankeyDfSum["text_files"],SankeyDfSum["unzipping_and_pdf2text_loss"],SankeyDfSum["preprocessed_files"],SankeyDfSum["preprocessing_loss"],
+
+#--------------------5---------------------------6--------------------------------7-------------------------8----------------
+SankeyDfSum["filtered_files"],SankeyDfSum["filtering_loss"], SankeyDfSum["filtered_files"], SankeyDf["ref_db_files"][0],
+
+#--------------------9---------------------------10---------
+SankeyDfSum["aligned_files"],SankeyDfSum["alignment_loss"]])
+
+
+all_nodes =SankePlotDf.Source.values.tolist() + SankePlotDf.Dest.values.tolist()
+
+source_indices = [all_nodes.index(source) for source in SankePlotDf.Source] ## Retrieve source nodes indexes as per all nodes list.
+target_indices = [all_nodes.index(dest) for dest in SankePlotDf.Dest] ## Retrieve destination nodes indexes as per all nodes list.
+
+colors = pex.colors.qualitative.D3
+
+node_colors_mappings = dict([(node,np.random.choice(colors)) for node in all_nodes])
+
+node_colors = [node_colors_mappings[node] for node in all_nodes]
+edge_colors = [node_colors_mappings[node] for node in SankePlotDf.Source] ## Color links according to source nodes
+
+fig = go.Figure(data=[
+                    go.Sankey(
+                        node = dict(
+                                pad = 20,
+                                thickness = 20,
+                                line = dict(color = "black", width = 1.0),
+                                label =  all_nodes,
+                                color =  node_colors,
+                               ),
+                        link = dict(
+                               source =  source_indices,
+                               target =  target_indices,
+                               value =  SankePlotDf.Count,
+                               color = edge_colors
+                               )
+                         )
+                    ])
+
+fig.update_layout(title_text="SciView Sankey Diagram", font_size=16)
+                  height=600,
+                  font=dict(size = 10, color = 'white'),
+                  plot_bgcolor='black', paper_bgcolor='black')
+
+fig.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2311,6 +2481,42 @@ with open(path2, "r", encoding="utf8") as f:
 # Concatenate all of the aligned and cleaned joined dataframes into a single one
 #-------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------
+
+import dask.dataframe as dd
+import pandas as pd
+
+
+# Define start and end directory numbers
+StartDir=0
+EndDir=2
+
+# Define the suffixes for the joined and cleaned dataframes
+MetaDataJoined_Suffix="_MetaDataJoined.pkl"
+
+# Loop through the directories and concatenate the joined and cleaned dataframes
+for dirNum in range(StartDir, EndDir+1):
+    # Load the joined and cleaned dataframe
+    path=(IntermediateData_Path + str(dirNum).zfill(3) + MetaDataJoined_Suffix)
+    df=pd.read_pickle(path)
+
+    # Append the dataframe to csv file and check that no additonal header row is added except for the first dataframe
+    csvPath=(IntermediateData_Path + str(dirNum).zfill(3) + "_" + str(EndDir).zfill(3) + MetaDataJoined_Suffix2)
+
+    if dirNum==StartDir:
+        df_All.to_csv(csvPath, index=False)
+    else:
+        df_All.to_csv(csvPath, index=False, header=False)
+    print(path, "is saved")
+
+
+# Load the generated csv file into a dask dataframe
+path=(IntermediateData_Path + str(StartDir).zfill(3) + "_" + str(EndDir).zfill(3) + ".csv")
+df_All=dd.read_csv(path)
+
+# Create a histogramm plot based on the year column in the df_All dask dataframe
+df_All["year"].hist(bins=100).compute
+
+
 
 
 
