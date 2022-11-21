@@ -2331,7 +2331,7 @@ ref_db_files # Amount of entries in the reference database
 
 # Define start and end directory
 StartDir=0
-EndDir=10
+EndDir=199
 
 # Create an empty dataframe to store the information for each directory
 SankeyDf=pd.DataFrame(columns=["dirNum","compressed_pdf_files", "unzipping_and_pdf2text_loss", "text_files", "preprocessing_loss", "preprocessed_files", "filtering_loss", "filtered_files", "alignment_loss", "aligned_files", "ref_db_files"])
@@ -2456,6 +2456,88 @@ fig.update_layout(title_text="SciView Sankey Diagram", font_size=16)
                   plot_bgcolor='black', paper_bgcolor='black')
 
 fig.show()
+
+
+
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# Check why some of path in the doiPathDictionary can not be read
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+
+import pickle
+
+path='Y:\\IntermediateData\\000_DOI_Path_Dict.pkl'
+doiPathDict=pickle.load(open(path, 'rb'))
+
+with open(path, 'rb') as handle:
+    interDict2 = pickle.load(handle)  
+return interDict2
+
+for doi, path in doiPathDict.items():
+
+    # Load Text
+    try:
+        Ft=open(path, "r", encoding="utf8").read()
+
+    
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# Create and index for a dask dataframe in order to find values faster
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+import dask.dataframe as dd
+
+# Load the dask dataframe
+path='Y:\\Reference_Databases\\unpaywall\\xaa-xba.csv'
+ref_db_files=len(dd.read_csv(path))
+
+# Extract the doi column from the dask dataframe and use it to create an index
+doi_index=dd.read_csv(path)["doi"].compute()
+
+# Use a doi string to find the index of the doi in the doi_index
+def find_doi_index(doi):
+    return doi_index.get_loc(doi)
+
+
+
+
+
+
+
+
+.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# Check if the language detection really works
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+
+df=pd.read_pickle("Y:\\IntermediateData\\000_MetaDataJoined.pkl")
+df["language"].unique()
+df[df["language"]=="no"]
+list(df["doi"][df["language"]=="no"])[0]
+
+
 
 
 

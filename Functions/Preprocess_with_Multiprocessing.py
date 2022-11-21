@@ -4,6 +4,7 @@ import pickle
 import pandas as pd
 import multiprocessing as mp
 import gc
+import time
 
 #----------------------------------------#
 # If the conda environment does not get correctly activated (e.g. import gensim is not working)
@@ -21,13 +22,16 @@ MetaData_Suffix="_MetaData.pkl"
 encodeError_Suffix="_errEnc.pkl"
 
 # Set the dirs to save doi and paths
-StartDir=175
-EndDir=299
+StartDir=411
+EndDir=599
 
 #----------------------------------------#
 
 # Iterate trough data directories
 for dirNum in range(StartDir,EndDir+1):
+
+    tic = time.perf_counter()
+
     #Load the dict
     dictItem=Dict_Loader(dirNum, IntermediateData_Path, doiPath_Suffix)  
     print("Length of dictionary num:", dirNum, "is", len(dictItem),"First two keys are:", list(dictItem.keys())[0:2])
@@ -45,27 +49,23 @@ for dirNum in range(StartDir,EndDir+1):
     print("pool with 10 processes")
     Return=pool.map(Preprocessed_Dict_and_Metadata, slicedDictList)
     pool.close
-
-    print("Preprocess the text files of dirNum: ", dirNum)
+    print("Preprocessed the text files of dirNum: ", dirNum)
 
     # Append Metadata
     slicedMetaDataList=[]
     for item in Return:
         slicedMetaDataList.append(item[0])
     metaData = pd.concat(slicedMetaDataList)
-    print("Apppended all of the metaData for file: ", dirNum)
 
     # Append preprocessed text Dictionaries
     FtPr={}
     for item in Return:
         FtPr.update(item[1])
-    print("Apppended all of the FtPr dictionaries for file: ", dirNum)
 
     # Append encoidng error dicitonaries
     encErr={}
     for item in Return:
         encErr.update(item[2])
-    print("Apppended all of the encoding error dictionaries for file: ", dirNum)
 
     # Create name for the metaData
     # Bring for example 27 into the form of "027"
@@ -99,4 +99,5 @@ for dirNum in range(StartDir,EndDir+1):
     del(metaData)
     gc.collect()
 
-    print("saved all of the files")
+    toc = time.perf_counter()
+    print("Processing of dirNum: ", dirNum, " took: ", (toc-tic)/60, " minutes") 

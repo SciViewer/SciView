@@ -175,6 +175,8 @@ def Preprocessed_Dict_and_Metadata(doiPathDict):
         try:
             Ft=open(path, "r", encoding="utf8").read()
 
+            Checkpoint=0
+
             # Try detecting language
             try:
                 language=detect_langs(Ft)
@@ -199,9 +201,12 @@ def Preprocessed_Dict_and_Metadata(doiPathDict):
             # MetaData=MetaData.append(pd.DataFrame([[doi,len(FtToPr),language]],
             #             columns=["DOI","Token Amount", "Language"]),ignore_index = True)
             
+            Checkpoint=1
+
             # Create MetaDataframe for appending to the MetaData Dataframe
             data={"DOI":doi,"Token Amount":len(FtToPr),"Language":language}
-            MetaDf=pd.DataFrame(data,columns=["DOI","Token Amount", "Language"])
+            # MetaDf=pd.DataFrame(data,columns=["DOI","Token Amount", "Language"])
+            MetaDf=pd.DataFrame([data])
 
             #Concatenate the MetaDf to the MetaData Dataframe
             MetaData=pd.concat([MetaData,MetaDf],axis=0)
@@ -209,8 +214,8 @@ def Preprocessed_Dict_and_Metadata(doiPathDict):
             # Append Preprocessed texts as dictionary
             FtPr[doi]=FtToPr
 
-        except:
-            print("Exception thrown!" + path)
+        except Exception as e:
+            print("Exception thrown!", " | ", doi , " | " , path , " | ", Checkpoint, " | " , e)
             encodingError[doi]=path
         
         if iterCount % 2000 == 0: 
