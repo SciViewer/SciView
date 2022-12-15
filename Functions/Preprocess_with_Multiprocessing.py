@@ -16,8 +16,8 @@ from env_Jupyter import *
 #     print(f.read())
 
 # Set the dirs to save doi and paths
-StartDir=100
-EndDir=100
+StartDir=0
+EndDir=49
 
 #----------------------------------------#
 
