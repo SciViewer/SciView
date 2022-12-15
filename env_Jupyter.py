@@ -1,24 +1,52 @@
 # Define input paths and file names
 #-------------------------------------------
-# Data directory
+# Data directories
 IntermediateData_Path="Y:\\IntermediateData\\"
 DataPath="Y:\\Data\\"
-FtPr_Suffix="_FtPr.pkl"
+
 
 # Define output path and file names
 #-------------------------------------------
 
-# Preprocessing
-MetaData_Suffix="_MetaData.pkl"
+# Dictionary with DOIs and corresponding Path
 DOIPath_Suffix="_DOI_Path_Dict.pkl"
+
+# Full Test Preprocessed
+FtPr_Suffix="_FtPr.pkl"
+
+# Meta Data from preprocessing step
+MetaData_Suffix="_MetaData.pkl"
+
+# Error logging from preprocessing step
 EncodeError_Suffix="_errEnc.pkl"
 
-# Define filters and corresponding suffix
-minTokenN=200
-maxTokenN=15000
-language="en"
-MetaDataFiltered_Suffix="_MetaDataFiltered.pkl"
+# Loging intervall when processing unpaywall dataset
+logEntries=int(1e5) # Intervall of loging
 
+# Path to the unzipped and splitted unpaywall datasets
+path='Y:\\Reference_Databases\\unpaywall\\splitted'
+
+# Path to the concatenated csv unpaywall dataset file (from the splitted .pkl files)
+csvPath='Y:\\Reference_Databases\\unpaywall\\xaa-xba.csv'
+
+
+MetaDataJoined_Suffix="_MetaDataJoined.pkl"
+LengthInfoDf_Suffix="_LengthInfoDf.pkl"
+LengthInfoDf_Suffix2="_LengthInfoDf2.csv"
+
+#--------- Cleaned up ------------
+
+# Define input paths and file names
+# IntermediateData_Path="Y:\\IntermediateData\\"
+# MetaData_Suffix="_MetaData.pkl"
+# MetaDataFiltered_Suffix="_MetaDataFiltered.pkl"
+
+
+# # Define filters and corresponding suffix
+# minTokenN=200
+# maxTokenN=15000
+# language="en"
+# MetaDataFiltered_Suffix="_MetaDataFiltered.pkl"
 
 
 # # Model_Path="Y:\\Models\\"
@@ -37,7 +65,6 @@ MetaDataFiltered_Suffix="_MetaDataFiltered.pkl"
 # LogFilePath="Y:\\Models\\0_99_10000_Sampling_Log.txt"
 
 # #------------------------------------------------------------------------------
-
 
 # # Filtered meta data
 

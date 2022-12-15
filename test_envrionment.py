@@ -1,5 +1,6 @@
 import chunk
 import csv
+from optparse import Values
 from turtle import shape
 from importlib_metadata import files
 from itsdangerous import json
@@ -2609,6 +2610,146 @@ df_All["year"].hist(bins=100).compute
 
 
 
+
+
+
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# ## Write single preprocessed files to a single file instead to a dictionary
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# Load packages
+from Functions.F1_Subsets_and_PreProcessing import Preprocessed_Dict_and_Metadata, Dict_Loader, Preprocess_Token_List
+import gensim
+from langdetect import detect_langs # pip install langdetect
+import time
+import os
+import json
+import pandas as pd
+
+from env_Jupyter import *
+# with open('env_Jupyter.py', 'r') as f:
+#     print(f.read())
+
+dirNum=303
+# dictItem=Dict_Loader(dirNum, IntermediateData_Path, DOIPath_Suffix)  
+# pairNum=100
+# doi=list(dictItem.keys())[pairNum]
+# path=list(dictItem.values())[pairNum]
+# print(doi,path)
+
+doiPathDict=Dict_Loader(dirNum, IntermediateData_Path, DOIPath_Suffix)  
+
+
+def Preprocessed_Dict_and_Metadata(doiPathDict):
+
+    '''
+    This function preprocesses the dictionary and creates a metadata dictionary
+        Input: doiPathDict - the dictionary of the form {doi:path}
+        Output: interDict - the preprocessed dictionary 
+                metadata - the metadata dictionary
+    '''
+
+    # Start Global Timer which times the whole function
+    tic = time.perf_counter()
+
+    # init local tic for iterCount which times a specific chunk of processed documents
+    tictic= time.perf_counter()
+
+    # Init MetaDataframe
+    MetaData=pd.DataFrame(columns=["DOI","Token Amount", "Language"])
+
+    # Init the counter of iterations
+    iterCount=0
+
+    # Init Dictionary for storing doi and path of documents which could not be openend
+    encodingError={}
+
+    # Iterate trough each doi and corresponding path  in the dictionary
+    for doi, path in doiPathDict.items():
+
+        # Create a new folder with the directory number as the name under the IntermediateData_Path
+        dirNumPath=IntermediateData_Path + str(dirNum).zfill(3) + "\\"
+        if os.path.exists(dirNumPath):
+            None
+        else:
+            os.mkdir(dirNumPath)
+            print(dirNumPath," path did not exist and has been created")
+
+        # Load Text and try preprocessing it
+        try:
+            Ft=open(path, "r", encoding="utf8").read()
+            Checkpoint=0
+
+            # Try detecting language
+            try:
+                language=detect_langs(Ft)
+            except:
+                language="no language detected"
+            
+            # Remove the end of phrase hyphenation
+            Ft=Ft.replace("-\n\n","") 
+            Ft=Ft.replace("-\n","") 
+
+            # FullText_Token.pickle
+            FtTo=list(gensim.utils.tokenize(Ft))
+
+            # Define additional Preprocessing parameters
+            minlength = 1
+            maxlength = 30
+
+            # Do the Preprocessing
+            FtToPr=Preprocess_Token_List(FtTo,minlength,maxlength)
+
+            # Create MetaDataframe for appending to the MetaData Dataframe
+            data={"DOI":doi,"Token Amount":len(FtToPr),"Language":language}
+            MetaDf=pd.DataFrame([data])
+
+            #Concatenate the MetaDf to the MetaData Dataframe
+            MetaData=pd.concat([MetaData,MetaDf],axis=0)
+
+            # Take the path (doiPathDict value) and adapt the relative path in order to create the dirNum + doi prefix path.
+            # Also the doi suffix is adapted in order to save the FtPr accordingly (e.g. 'Y:\\IntermediateData\\303\\10.1002\\9780470478509.neubb002066.json' )
+            rmPath='Y:\\Data\\'+ str(dirNum).zfill(3) + "00000\\"
+            doiPrefixSuffixPath = os.path.relpath(path, rmPath)
+            relPath=IntermediateData_Path+str(dirNum).zfill(3)+"\\"
+            relDoiPrefixSuffixPath = os.path.join(relPath, doiPrefixSuffixPath)
+            FtPrJsonPath=os.path.splitext(relDoiPrefixSuffixPath)[0]+'.json'
+
+            # Before saving the doi prefix directory has to be created. in order to get the path to the doi prefix the doi suffix is cut off from the 
+            relDoiPrefixPath=os.path.split(FtPrJsonPath)[0]+"\\"
+            if os.path.exists(relDoiPrefixPath):
+                None
+            else:
+                os.mkdir(relDoiPrefixPath)
+                print(relDoiPrefixPath," path did not exist and has been created")
+
+            # Now the FtPr can be saved as a json file
+            with open(FtPrJsonPath, 'w+') as f:
+                # indent=2 is not needed but makes the file human-readable 
+                # if the data is nested
+                json.dump(FtToPr, f, indent=2) 
+
+            # with open(path5, 'r') as f:
+            #     FtToPr2 = json.load(f)
+
+        except Exception as e:
+            print("Exception thrown!", " | ", doi , " | " , path , " | ", Checkpoint, " | " , e)
+            encodingError[doi]=path
+
+        # In order to track the saving process after every 5'000 doiPathDict pair a print output is generated
+        if iterCount % 5000 == 0: 
+            toctoc=time.perf_counter()
+            print('iterCount = {}'.format(iterCount), "", "Time elapsed in seconds: ", round(toctoc-tictic,4), ", in minutes ", round((toctoc-tictic)/60,4), ", in hours: ", round((toctoc-tictic)/3600,4))
+            print("The doi: ", doi, " with text loaded from path: ", path, " is processed and saved under: ",  FtPrJsonPath)
+            tictic= time.perf_counter()
+        iterCount+=1
+
+    #Stop global timer and print
+    toc = time.perf_counter()
+    print("Time elapsed in seconds: ", round(toc-tic,4), ", in minutes ", round((toc-tic)/60,4), ", in hours: ", round((toc-tic)/3600,4))
+
+    return MetaData, encodingError
 
 
 

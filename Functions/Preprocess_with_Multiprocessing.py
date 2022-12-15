@@ -22,9 +22,10 @@ MetaData_Suffix="_MetaData.pkl"
 encodeError_Suffix="_errEnc.pkl"
 
 # Set the dirs to save doi and paths
-StartDir=411
-EndDir=599
+StartDir=712
+EndDir=712
 
+# dirNum=533 <-----
 #----------------------------------------#
 
 # Iterate trough data directories
@@ -43,9 +44,13 @@ for dirNum in range(StartDir,EndDir+1):
         slicedDictList.append(item)
         print("Length of the slice is:",len(item), "First two keys of the slice are:", list(item.keys())[0:2])
 
+    # len(slicedDictList) # <-----
+    # slicedDictList=slicedDictList[:-2] # <-----
+    # len(slicedDictList) # <-----
+
     # Process each dictionary chunk
     print("Available cores: ",mp.cpu_count(), "(Pool = amount of cores)")
-    pool = mp.Pool(processes=10)
+    pool = mp.Pool(processes=10) # <----- processes=8)
     print("pool with 10 processes")
     Return=pool.map(Preprocessed_Dict_and_Metadata, slicedDictList)
     pool.close
