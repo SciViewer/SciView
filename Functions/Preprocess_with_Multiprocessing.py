@@ -3,7 +3,7 @@ from Functions.F1_Subsets_and_PreProcessing import Preprocessed_Dict_and_Metadat
 import pickle
 import pandas as pd
 import multiprocessing as mp
-import gc
+# import gc
 import time
 
 #----------------------------------------#
@@ -11,21 +11,14 @@ import time
 # https://stackoverflow.com/questions/56623269/cmd-warning-python-interpreter-is-in-a-conda-environment-but-the-environment
 #----------------------------------------#
 
-# Define input paths and file names
-IntermediateData_Path="Y:\\IntermediateData\\"
-doiPath_Suffix="_DOI_Path_Dict.pkl"
-
-# Define Output paths and file names
-IntermediateData_Path="Y:\IntermediateData\ "
-FtPr_Suffix="_FtPr.pkl"
-MetaData_Suffix="_MetaData.pkl"
-encodeError_Suffix="_errEnc.pkl"
+from env_Jupyter import *
+# with open('env_Jupyter.py', 'r') as f:
+#     print(f.read())
 
 # Set the dirs to save doi and paths
-StartDir=712
-EndDir=712
+StartDir=100
+EndDir=100
 
-# dirNum=533 <-----
 #----------------------------------------#
 
 # Iterate trough data directories
@@ -34,25 +27,21 @@ for dirNum in range(StartDir,EndDir+1):
     tic = time.perf_counter()
 
     #Load the dict
-    dictItem=Dict_Loader(dirNum, IntermediateData_Path, doiPath_Suffix)  
+    dictItem=Dict_Loader(dirNum, IntermediateData_Path, DOIPath_Suffix)  
     print("Length of dictionary num:", dirNum, "is", len(dictItem),"First two keys are:", list(dictItem.keys())[0:2])
 
     # Init a list which slices the dictionary into multiple dictionaries (each a chunk af 10000)
     slicedDictList=[]
     # Create and append dictionary chunks
     for item in Chunks(dictItem, 10000):
-        slicedDictList.append(item)
+        slicedDictList.append([item,IntermediateData_Path,dirNum])
         print("Length of the slice is:",len(item), "First two keys of the slice are:", list(item.keys())[0:2])
-
-    # len(slicedDictList) # <-----
-    # slicedDictList=slicedDictList[:-2] # <-----
-    # len(slicedDictList) # <-----
 
     # Process each dictionary chunk
     print("Available cores: ",mp.cpu_count(), "(Pool = amount of cores)")
-    pool = mp.Pool(processes=10) # <----- processes=8)
+    pool = mp.Pool(processes=10)
     print("pool with 10 processes")
-    Return=pool.map(Preprocessed_Dict_and_Metadata, slicedDictList)
+    Return=pool.map(Preprocessed_Dict_and_Metadata,slicedDictList)
     pool.close
     print("Preprocessed the text files of dirNum: ", dirNum)
 
@@ -62,31 +51,17 @@ for dirNum in range(StartDir,EndDir+1):
         slicedMetaDataList.append(item[0])
     metaData = pd.concat(slicedMetaDataList)
 
-    # Append preprocessed text Dictionaries
-    FtPr={}
-    for item in Return:
-        FtPr.update(item[1])
-
     # Append encoidng error dicitonaries
     encErr={}
     for item in Return:
-        encErr.update(item[2])
+        encErr.update(item[1])
 
     # Create name for the metaData
     # Bring for example 27 into the form of "027"
     dirNum=str(dirNum).zfill(3)
     # Create path to dictionary
     metaDataName=(IntermediateData_Path + dirNum + MetaData_Suffix).replace(" ","")
-    FtPrName=(IntermediateData_Path + dirNum + FtPr_Suffix).replace(" ","")
-    encErrName=(IntermediateData_Path + dirNum + encodeError_Suffix).replace(" ","")
-
-    # Store the returned elements
-    # create a binary pickle file 
-    a = open(FtPrName,"wb")
-    # write the python object (dict) to pickle file
-    pickle.dump(FtPr,a)
-    # close file
-    a.close()
+    encErrName=(IntermediateData_Path + dirNum + EncodeError_Suffix).replace(" ","")
 
     # Store the returned elements
     # create a binary pickle file 
@@ -98,11 +73,6 @@ for dirNum in range(StartDir,EndDir+1):
 
     # Save dataframe of metaData
     metaData.to_pickle(metaDataName)
-
-    # #Try delete large dataframe (Prevent memory loss error)
-    del(FtPr)
-    del(metaData)
-    gc.collect()
 
     toc = time.perf_counter()
     print("Processing of dirNum: ", dirNum, " took: ", (toc-tic)/60, " minutes") 

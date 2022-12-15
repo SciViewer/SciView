@@ -335,7 +335,7 @@ def Preprocessed_Dict_and_Metadata(inputList):
         if iterCount % 1000 == 0: 
             toctoc=time.perf_counter()
             print('iterCount = {}'.format(iterCount), "", "Time elapsed in seconds: ", round(toctoc-tictic,4), ", in minutes ", round((toctoc-tictic)/60,4), ", in hours: ", round((toctoc-tictic)/3600,4))
-            print( doi, " | ", path, " | " FtPrJsonPath)
+            print( doi, " | ", path, " | ", FtPrJsonPath)
             tictic= time.perf_counter()
         iterCount+=1
 
