@@ -1,9 +1,10 @@
 # Load packages
-from Functions.F1_Subsets_and_PreProcessing import Preprocessed_Dict_and_Metadata, Dict_Loader, Chunks
+from Functions.F1_Subsets_and_PreProcessing import Preprocessed_Dict_and_Metadata, Dict_Loader, Chunks, Get_DOI_Prefix
 import pickle
 import pandas as pd
 import multiprocessing as mp
 # import gc
+import os
 import time
 
 #----------------------------------------#
@@ -16,8 +17,10 @@ from env_Jupyter import *
 #     print(f.read())
 
 # Set the dirs to save doi and paths
-StartDir=0
+StartDir=10
 EndDir=49
+
+
 
 #----------------------------------------#
 
@@ -30,6 +33,32 @@ for dirNum in range(StartDir,EndDir+1):
     dictItem=Dict_Loader(dirNum, IntermediateData_Path, DOIPath_Suffix)  
     print("Length of dictionary num:", dirNum, "is", len(dictItem),"First two keys are:", list(dictItem.keys())[0:2])
 
+
+    # Get a list of unique Doi Prefixes in order to create the corresponding directories
+    # doiPathDict=Dict_Loader(dirNum, IntermediateData_Path, DOIPath_Suffix) 
+    doiPathDf=pd.DataFrame(dictItem.values())
+    doiPrefixUniqueList=list(doiPathDf[0].apply(Get_DOI_Prefix).unique())
+
+
+    # Create a new folder with the directory number as the name under the IntermediateData_Path
+    dirNumPath=IntermediateData_Path + str(dirNum).zfill(3) + "\\"
+    if os.path.exists(dirNumPath):
+        None
+    else:
+        os.mkdir(dirNumPath)
+        print(dirNumPath," path did not exist and has been created")
+
+    # Create directory for every doi prefix
+    for prefix in doiPrefixUniqueList:
+        dirNumPrefixPath= IntermediateData_Path + str(dirNum).zfill(3) + "\\" + prefix
+        if os.path.exists(dirNumPrefixPath):
+            None
+        else:
+            os.mkdir(dirNumPrefixPath)
+            print(dirNumPrefixPath," path did not exist and has been created")
+
+#----------------
+#----------------
     # Init a list which slices the dictionary into multiple dictionaries (each a chunk af 10000)
     slicedDictList=[]
     # Create and append dictionary chunks
@@ -44,6 +73,14 @@ for dirNum in range(StartDir,EndDir+1):
     Return=pool.map(Preprocessed_Dict_and_Metadata,slicedDictList)
     pool.close
     print("Preprocessed the text files of dirNum: ", dirNum)
+
+#----------------
+#----------------
+    # # Setup without multiprocessing
+    # DictList=[dictItem,IntermediateData_Path,dirNum]
+    # Return=Preprocessed_Dict_and_Metadata(DictList)
+#----------------
+#----------------
 
     # Append Metadata
     slicedMetaDataList=[]

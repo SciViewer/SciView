@@ -262,13 +262,13 @@ def Preprocessed_Dict_and_Metadata(inputList):
     # Iterate trough each doi and corresponding path  in the dictionary
     for doi, path in doiPathDict.items():
 
-        # Create a new folder with the directory number as the name under the IntermediateData_Path
-        dirNumPath=IntermediateData_Path + str(dirNum).zfill(3) + "\\"
-        if os.path.exists(dirNumPath):
-            None
-        else:
-            os.mkdir(dirNumPath)
-            print(dirNumPath," path did not exist and has been created")
+        # # Create a new folder with the directory number as the name under the IntermediateData_Path
+        # dirNumPath=IntermediateData_Path + str(dirNum).zfill(3) + "\\"
+        # if os.path.exists(dirNumPath):
+        #     None
+        # else:
+        #     os.mkdir(dirNumPath)
+        #     print(dirNumPath," path did not exist and has been created")
 
         # Load Text and try preprocessing it
         try:
@@ -310,13 +310,13 @@ def Preprocessed_Dict_and_Metadata(inputList):
             relDoiPrefixSuffixPath = os.path.join(relPath, doiPrefixSuffixPath)
             FtPrJsonPath=os.path.splitext(relDoiPrefixSuffixPath)[0]+'.json'
 
-            # Before saving the doi prefix directory has to be created. in order to get the path to the doi prefix the doi suffix is cut off from the 
-            relDoiPrefixPath=os.path.split(FtPrJsonPath)[0]+"\\"
-            if os.path.exists(relDoiPrefixPath):
-                None
-            else:
-                os.mkdir(relDoiPrefixPath)
-                print(relDoiPrefixPath," path did not exist and has been created")
+            # # Before saving the doi prefix directory has to be created. in order to get the path to the doi prefix the doi suffix is cut off from the 
+            # relDoiPrefixPath=os.path.split(FtPrJsonPath)[0]+"\\"
+            # if os.path.exists(relDoiPrefixPath):
+            #     None
+            # else:
+            #     os.mkdir(relDoiPrefixPath)
+            #     print(relDoiPrefixPath," path did not exist and has been created")
 
             # Now the FtPr can be saved as a json file
             with open(FtPrJsonPath, 'w+') as f:
@@ -367,3 +367,7 @@ def Dict_Loader(dirNum, doiPath_Path, doiPath_Suffix):
         interDict = pickle.load(handle)  
     return interDict
 
+
+
+def Get_DOI_Prefix(doiPath):
+    return os.path.basename(os.path.split(doiPath)[0])

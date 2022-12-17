@@ -1,4 +1,5 @@
 TORRENT_PATH=/mnt/share/Torrentfiles
 DATA_PATH=/mnt/share/Data
+INTER_DATA_PATH=/mnt/share/IntermediateData
 RAW_DATA_PATH=/mnt/share/RawData
 CONN=SciMagDB

@@ -63,6 +63,13 @@ function overview(){
     done
 }
 
+function jsoncount(){
+    init
+    for y in $(seq -w $1 $2 $3); do
+	    echo "Directory: "$y "JSON count: " $(find $INTER_DATA_PATH/${y}/ -name "*.json*" | wc -l) 
+    done
+}
+
 
 function rmpdf(){
     init
@@ -126,6 +133,9 @@ case "$1" in
         ;;
     overview)
         overview $2 $3 $4
+        ;;
+    jsoncount)
+        jsoncount $2 $3 $4
         ;;
     rmpdf)
         rmpdf $2 $3
