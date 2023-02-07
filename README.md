@@ -14,6 +14,13 @@ The goal of this project can be described along the following points:
 
 The repository itself consists of two different projects; the knowledge base (Blog articles) describing the process and insights of this project and the actual repository for implementation.
 
+**SciView Dataset**
+
+<img src="Knowledge and Blog\P0_sankey.png" width="1000">
+
+
+
+
 **Knowledge and Blog**
 
 Accompanied to this repository blog articles are and will be written. The posts themself are also contained in this repository and the [**Main Section**](/Knowledge%20and%20Blog/SciView_Main.md) is the starting point of those posts.
