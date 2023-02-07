@@ -18,7 +18,9 @@ The repository itself consists of two different projects; the knowledge base (Bl
 
 <img src="Knowledge and Blog\P0_sankey.png" width="1000">
 
+<img src="Knowledge and Blog\P0_head.png" width="1000">
 
+<img src="Knowledge and Blog\P0_tail.png" width="1000">
 
 
 **Knowledge and Blog**
@@ -38,12 +40,14 @@ The actual framwork encompasses the following files:
     * Path defined which are used in scidb functions
 * SciView.ipynb 
     * Notebook about NLP workflows
-* modelConfig_0_99.py 
+* env_scidb.py 
     * Configuration file for generating models and corresponding data
 * test_envrionment.py
     * A bag of test codes and other snippets
+* SciView_env.yaml
+* 
 
-# Generate dataset and process Jupyter Notebook
+# Generate dataset and process with Jupyter Notebook
 SciView is a collection of a dataset and corresponding analysis of it through NLP applications enabled in a Jupyter Notebook. 
 
 The [**Guide to dataset Generation**](/Knowledge%20and%20Blog/Guide_Dataset_Generation.md) contains the following topics:
@@ -57,8 +61,3 @@ An Anaconda Python 3.7.11 environment is set up and the installed package verrsi
     conda env export > C:\Users\Public\Documents\SciView_env.yaml
 
 The corresponding [**yaml**](SciView_env.yaml) file can be imported to in Anaconda. (It is recommended to use this enviroment. An example for possible problems with newer Python or package versions is the Pickle protocol version which can change depending on the version of Python.)
-
-# ToDo
-[ ] Clean up Jupyter Notebook
-[ ] Comment all of the functions
-[ ] Finish Chapter 3 then
