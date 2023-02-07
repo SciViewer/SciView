@@ -215,12 +215,23 @@ def Sankey_DataFlow_Graph(SankeyDf):
     source_indices = [all_nodes.index(source) for source in SankePlotDf.Source] ## Retrieve source nodes indexes as per all nodes list.
     target_indices = [all_nodes.index(dest) for dest in SankePlotDf.Dest] ## Retrieve destination nodes indexes as per all nodes list.
 
-    colors = pex.colors.qualitative.D3
+    # colors = pex.colors.qualitative.D3
+    # node_colors_mappings = dict([(node,np.random.choice(colors)) for node in all_nodes])
+    # node_colors = [node_colors_mappings[node] for node in all_nodes]
+    # edge_colors = [node_colors_mappings[node] for node in SankePlotDf.Source] ## Color links according to source nodes
 
-    node_colors_mappings = dict([(node,np.random.choice(colors)) for node in all_nodes])
+    # The node colors have to be set to 16 labels. The ligned files labelis highlighted with another color
+    # ['compressed_pdf_files', 'compressed_pdf_files', 'text_files', 'text_files', 'preprocessed_files', 'ref_db_files', 'Alignment_step', 'Alignment_step',
+    #  'text_files', 'unzipping_and_pdf2text_loss', 'preprocessed_files', 'preprocessing_loss', 'Alignment_step', 'Alignment_step', 'aligned_files', 'alignment_loss']
+    colors=pex.colors.sequential.Blugrn
+    node_colors=14*[colors[6]] 
+    node_colors.append("rgb(255, 238, 136)")
+    node_colors.append(colors[6])
 
-    node_colors = [node_colors_mappings[node] for node in all_nodes]
-    edge_colors = [node_colors_mappings[node] for node in SankePlotDf.Source] ## Color links according to source nodes
+    # The edge colors have to be set to 8 labels with a gradient color pattern
+    # ['compressed_pdf_files', 'compressed_pdf_files', 'text_files', 'text_files', 'preprocessed_files', 'ref_db_files', 'Alignment_step', 'Alignment_step']
+    colors=pex.colors.sequential.tempo
+    edge_colors=colors[-8::]
 
     fig = go.Figure(data=[
                         go.Sankey(

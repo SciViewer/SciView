@@ -1,6 +1,6 @@
 # SciView
 
-SciView offers a dataset and tools for intuitively managing, exploring and navigating millions of publications with your own hardware.
+SciView offers a dataset and tools for intuitively managing, exploring and navigating millions of fulltext publications with your own hardware.
 
 ## About
 <img src="P0_drowning_in_publications.png" width="400">
@@ -38,6 +38,16 @@ But what I prioritized above everything was that the project is done without any
 
 ## The Repository
 The [SciView](https://github.com/SebastianVonRotz/SciView) repository is of course the main part of this project and further information can of course be found on the repository itself.
+
+In order to start generating this dataset on your own the page [Dataset Generation Guide](Guide_Dataset_Generation.md) explains everything step by step.
+
+## Dataset
+
+
+
+## Download
+
+Obiously I can not put up a Link for downloading millions of 
 
 ## Blog Posts
 As you reading this you are already reading the introduction to the SciView project and the first entry of the corresponding blog posts. The blog posts will highlight decisions, learnings and other background infromation around SciView and also be part of the repository. Below the upcoming posts and progress is listed and will be continuously updated:

@@ -29,7 +29,10 @@ All of these points have been successfully implemented with this Synology NAS an
 For scaling up I calculated that the whole repository will be around 56 TB (more to it on learning and pitfalls). I got hands on a secondhand DS1813+ offering eight bays. I gradually equipped it with 8 TB harddrives.
 
 ### NAS for backup
-Backing part intermediate processed data was expected to around the amount of 8 TB.
+Backing up the processed data was expected to around the amount of 8 TB. For the transfer from one Synology NAS system to the other a remote mount (File Station > Tools > Mount remote folder) was set up based on the CIFS file protocols. An example configuration is given in the picture below.
+
+<img src="P1_cifs_connection.png" width="300">
+
 
 ### Learnings and pitfalls
 - I was not aware of the different RAID configuration of a multi disk NAS. I therefore went with the standard Synology hybrid raid (SHR). After inserting the second 8TB the storage did not expand as expected. After some googling was clear the the SHR configuration uses one harddrive as backup drive and therfore needs a third drive for the first expansion of the total volume.

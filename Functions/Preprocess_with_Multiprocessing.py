@@ -17,8 +17,8 @@ from env_Jupyter import *
 #     print(f.read())
 
 # Set the dirs to save doi and paths
-StartDir=10
-EndDir=49
+StartDir=200
+EndDir=399
 
 
 
@@ -29,7 +29,7 @@ for dirNum in range(StartDir,EndDir+1):
 
     tic = time.perf_counter()
 
-    #Load the dict
+    #Load the dict 
     dictItem=Dict_Loader(dirNum, IntermediateData_Path, DOIPath_Suffix)  
     print("Length of dictionary num:", dirNum, "is", len(dictItem),"First two keys are:", list(dictItem.keys())[0:2])
 

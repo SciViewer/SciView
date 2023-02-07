@@ -66,7 +66,7 @@ function overview(){
 function jsoncount(){
     init
     for y in $(seq -w $1 $2 $3); do
-	    echo "Directory: "$y "JSON count: " $(find $INTER_DATA_PATH/${y}/ -name "*.json*" | wc -l) 
+	    echo "Directory: "$y "JSON count: " $(find $INTER_DATA_PATH/${y}/ -name "*.json*" | wc -l) "Text count: " $(find $DATA_PATH/${y}00000/ -name "*.txt" | wc -l) 
     done
 }
 
@@ -95,22 +95,16 @@ function rmzip(){
 
 function help() {
 echo
-echo
-echo "task commmands:"
 echo "(task) command <argument>         description"
 echo "---------------------------------------------------------------------------------------------"
 echo "torrentdl                         Downloads torrent files from scimag"
 echo "dlunzip <001> <004> (req. rooot)  unzips files in a range of directories (Activate root first!!!)"
 echo "pdf2text <001> <004>              Uses pdftotext from popler utilities to transform pdf files into text files"
+echo "overview <001> <004>              Count the number of pdf and text files in each directory"
+echo "jsoncount <001> <004>             Count the number of json and text files in each directory"
 echo "rmpdf  <001> <004>                Removes unzipped pdf files (usually applied after transformation to text)"
 echo "rntext  <001> <004>               Renames text files which end with .pdf.txt into .pdf"
 echo "rmzip  <001> <004>                Removes zip files (usually applied after deleting of pdfs)"
-echo 
-echo 
-echo 
-echo "Helping commands:"
-echo "command                           description"
-echo "--------------------------------------------"
 echo "dos2unix                          Convert dos files into unix files. Apply if a problem comes up"
 echo "init                              Loads the env_scidb paths and creates the mount"
 echo "overview <001> <1> <004>          Returns pdf and text file count for the given directory range"

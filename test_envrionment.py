@@ -2539,26 +2539,6 @@ df[df["language"]=="no"]
 list(df["doi"][df["language"]=="no"])[0]
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #-------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------
 # Concatenate all of the aligned and cleaned joined dataframes into a single one
@@ -2598,16 +2578,6 @@ df_All=dd.read_csv(path)
 
 # Create a histogramm plot based on the year column in the df_All dask dataframe
 df_All["year"].hist(bins=100).compute
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2753,23 +2723,132 @@ def Preprocessed_Dict_and_Metadata(doiPathDict):
 
 
 
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# ## Adapt color scheme of the sankey diagram
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+
+# When directories are created with multiprocessing errors can occur
+
+# Load packages
+from Functions.F1_Subsets_and_PreProcessing import Preprocessed_Dict_and_Metadata, Dict_Loader, Preprocess_Token_List
+# import gensim
+# from langdetect import detect_langs # pip install langdetect
+# import time
+import os
+# import json
+import pandas as pd
+
+from env_Jupyter import *
+# with open('env_Jupyter.py', 'r') as f:
+#     print(f.read())
+
+dirNum=60
+# dictItem=Dict_Loader(dirNum, IntermediateData_Path, DOIPath_Suffix)  
+# pairNum=100
+# doi=list(dictItem.keys())[pairNum]
+# path=list(dictItem.values())[pairNum]
+# print(doi,path)
+
+def Get_DOI_Prefix(doiPath):
+    return os.path.basename(os.path.split(doiPath)[0])
+
+doiPathDict=Dict_Loader(dirNum, IntermediateData_Path, DOIPath_Suffix) 
+doiPathDf=pd.DataFrame(doiPathDict.values())
+doiPrefixUniqueList=list(doiPathDf[0].apply(Get_DOI_Prefix).unique())
+
+
+# Create a new folder with the directory number as the name under the IntermediateData_Path
+dirNumPath=IntermediateData_Path + str(dirNum).zfill(3) + "\\"
+if os.path.exists(dirNumPath):
+    None
+else:
+    os.mkdir(dirNumPath)
+    print(dirNumPath," path did not exist and has been created")
+
+for prefix in doiPrefixUniqueList:
+    dirNumPrefixPath= IntermediateData_Path + str(dirNum).zfill(3) + "\\" + prefix
+    if os.path.exists(dirNumPrefixPath):
+        None
+    else:
+        os.mkdir(dirNumPrefixPath)
+        print(dirNumPrefixPath," path did not exist and has been created")
 
 
 
 
 
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# ## Create a singular Scieview Dataset for quering
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+import jsonlines
+import time
+import pandas as pd
+import os
+import dask.dataframe as dd
+import pickle
+# from Functions.F2_Reference_Databases_and_Alignment import Clean_Joined_Df, Sankey_Dataframe, Sankey_DataFlow_Graph
+import numpy as np
+import plotly.graph_objects as go
+import plotly.express as pex
+
+from env_Jupyter import *
+# with open('env_Jupyter.py', 'r') as f:
+#     print(f.read())
+
+
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# ## Streaming and sampling approach for phrase model, dictionary, BoW corpus and LDA
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+import jsonlines
+import time
+import pandas as pd
+import os
+import dask.dataframe as dd
+import pickle
+from Functions.F2_Reference_Databases_and_Alignment import Clean_Joined_Df, Sankey_Dataframe, Sankey_DataFlow_Graph
+import numpy as np
+import plotly.graph_objects as go
+import plotly.express as pex
+
+from env_Jupyter import *
+# with open('env_Jupyter.py', 'r') as f:
+#     print(f.read())
+
+
+StartDir=0
+EndDir=99
+
+# Create the csv file with headers based on the first joined Metadata 
+path=(IntermediateData_Path + str(StartDir).zfill(3) + MetaDataJoined_Suffix)
+MetaDataJoinedDf=pd.read_pickle(path)
+MetaDataJoinedDf.to_csv(SciViewDataset_Path, mode='a', index=False, header=True)
+
+# Iterate trough data directories and append without headers
+for dirNum in range(StartDir+1,EndDir+1):
+
+    # Create path to dictionary and read the preprocessed metadata file
+    path=(IntermediateData_Path + str(dirNum).zfill(3) + MetaDataJoined_Suffix)
+    MetaDataJoinedDf=pd.read_pickle(path)
+    MetaDataJoinedDf.to_csv(SciViewDataset_Path, mode='a', index=False, header=False)
+    print(path, "is appended")
 
 
 
+# Read the created csv file with dask
+RefDf=dd.read_csv(SciViewDataset_Path)
 
+# show the amount of dask partitions
+RefDf.npartitions
 
-
-
-
-
-
-
-
+# Compute head
+RefDf.head(n=5, compute=True)
+RefDf.tail(n=5, compute=True)
 
 
 
@@ -2900,3 +2979,202 @@ lda = gensim.models.ldamodel.LdaModel(corpus=MyCorpus(),
                                       passes=1)
 toc= time.perf_counter()
 print("Time:", toc-tic)
+
+
+
+
+
+
+
+
+
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+# ## Streaming and sampling approach for phrase model, dictionary, BoW corpus and LDA New
+#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
+import jsonlines
+import time
+import pandas as pd
+import os
+import dask.dataframe as dd
+import pickle
+from Functions.F2_Reference_Databases_and_Alignment import Clean_Joined_Df, Sankey_Dataframe, Sankey_DataFlow_Graph
+import numpy as np
+
+import urllib.parse
+import gensim
+import json
+
+from env_Jupyter import *
+# with open('env_Jupyter.py', 'r') as f:
+#     print(f.read())
+
+
+bigramMinFreq=10
+bigramThreshold=10
+phraseVocabSize=400000000
+
+sampleNDoc=100
+randomState=1234
+# num_rows = len(SciViewDd)
+num_rows = 61892491
+dictVocab=60000000
+
+
+# Read the created csv file with dask
+SciViewDd=dd.read_csv(SciViewDataset_Path)
+
+# Sample random entries of the Meta data by applying the pandas sample function to the meta data frame
+SciViewDfSample=SciViewDd.sample(frac=sampleNDoc/num_rows, random_state=randomState,replace=None)
+SciViewDfSample=SciViewDfSample.compute()
+len(SciViewDfSample)
+SciViewDfSample=SciViewDfSample.reset_index(drop=True)
+SciViewDfSample
+
+SciViewDfSample=SciViewDfSample[0:10]
+
+
+
+# # Get doi and data_dir from a specific row
+# doi, data_dir=SciViewDfSample[["doi","data_dir"]].loc[0]
+# #               Storage location        1 -> 001                      Get prefix of Doi (10.1093)       Join with "/"        Get Suffix of Doi and replace / to %2F              Add ending      Replace all / with \\                 
+# pathText=("Y:\\IntermediateData\\" + str(data_dir).zfill(3) + "\\" + urllib.parse.quote(doi).split('/', 1)[0] + "/" + urllib.parse.quote(doi).split('/', 1)[1].replace("/","%2F") + ".json").replace("/", "\\")
+# with open(pathText, "r", encoding="utf8") as f:
+#     data = json.load(f)
+# data
+
+class MyCorpus:
+    def __iter__(self):
+        for i in range(0,len(SciViewDfSample)):
+
+            # Get the doi and data_dir of the current row in of the sample
+            doi, data_dir=SciViewDfSample[["doi","data_dir"]].loc[i]
+
+            # doi has to be encoded through urllib and certain characters have to be manualy changed
+            #               Storage location        1 -> 001                      Get prefix of Doi (10.1093)       Join with "/"        Get Suffix of Doi and replace / to %2F              Add ending      Replace all / with \\                 
+            pathText=("Y:\\IntermediateData\\" + str(data_dir).zfill(3) + "\\" + urllib.parse.quote(doi).split('/', 1)[0] + "/" + urllib.parse.quote(doi).split('/', 1)[1].replace("/","%2F") + ".json").replace("/", "\\")
+
+            # Try opening the file if the path is correctly encoded
+            try:
+                with open(pathText, "r", encoding="utf8") as f:
+                    yield json.load(f)
+            except:
+                print(pathText, doi)
+
+
+# Create bigram model based on the corpus
+bigram = gensim.models.phrases.Phrases(MyCorpus(), min_count=bigramMinFreq, threshold=bigramThreshold, max_vocab_size=phraseVocabSize)
+
+
+# Freeze bigram model
+frozen_bigram_model = bigram.freeze()
+
+
+class MyCorpus:
+    def __iter__(self):
+        for i in range(0,len(SciViewDfSample)):
+            doi, data_dir=SciViewDfSample[["doi","data_dir"]].loc[i]
+
+            # doi has to be encoded through urllib and certain characters have to be manualy changed
+            #               Storage location        1 -> 001                      Get prefix of Doi (10.1093)       Join with "/"        Get Suffix of Doi and replace / to %2F              Add ending      Replace all / with \\                 
+            pathText=("Y:\\IntermediateData\\" + str(data_dir).zfill(3) + "\\" + urllib.parse.quote(doi).split('/', 1)[0] + "/" + urllib.parse.quote(doi).split('/', 1)[1].replace("/","%2F") + ".json").replace("/", "\\")
+
+            # Try opening the file if the path is correctly encoded
+            try:
+                with open(pathText, "r", encoding="utf8") as f:
+                    # print(frozen_bigram_model[f])
+                    yield frozen_bigram_model[json.load(f)]
+            except:
+                print(pathText, doi)
+
+
+
+dct=gensim.corpora.Dictionary(MyCorpus(), prune_at=dictVocab)
+["DictAddDocs",dct.num_docs, len(dct),dct.num_pos]
+
+topN=1100
+topNToken=sorted(dct.cfs, key=dct.cfs.get, reverse=True)[0:topN]
+print([[dct[id], dct.cfs[id]] for id in topNToken])
+w2cSorted=dict(sorted(dct.items(), key=lambda x: x[1],reverse=True))
+
+
+class MyCorpus:
+    def __iter__(self):
+        for i in range(0,len(SciViewDfSample)):
+            doi, data_dir=SciViewDfSample[["doi","data_dir"]].loc[i]
+
+            # doi has to be encoded through urllib and certain characters have to be manualy changed
+            #               Storage location        1 -> 001                      Get prefix of Doi (10.1093)       Join with "/"        Get Suffix of Doi and replace / to %2F              Add ending      Replace all / with \\                 
+            pathText=("Y:\\IntermediateData\\" + str(data_dir).zfill(3) + "\\" + urllib.parse.quote(doi).split('/', 1)[0] + "/" + urllib.parse.quote(doi).split('/', 1)[1].replace("/","%2F") + ".json").replace("/", "\\")
+
+            # Try opening the file if the path is correctly encoded
+            try:
+                with open(pathText, "r", encoding="utf8") as f:
+                    # print(frozen_bigram_model[f])
+                    yield dct.doc2bow(frozen_bigram_model[json.load(f)], allow_update=False)
+            except:
+                print(pathText, doi)
+
+# class MyCorpus:
+#     def __iter__(self):
+
+#         for line in open('test2bigram.txt', encoding="utf-8"):
+#             # assume there's one document per line, tokens separated by whitespace
+#             yield dct.doc2bow(line.lower().split())
+
+
+import time
+tic = time.perf_counter()
+lda = gensim.models.ldamodel.LdaModel(corpus=MyCorpus(), 
+                                      id2word=dct,
+                                      num_topics=100,
+                                      update_every=1,
+                                      chunksize=10000,
+                                      passes=1)
+
+lda.print_topics(-1,num_words=10)
+
+
+
+
+
+
+
+
+
+# # Y:\IntermediateData\634\10.1093\acprof%3Aoso\9780199669417.003.0006.json 10.1093/acprof:oso/9780199669417.003.0006
+# doi="10.1093/acprof:oso/9780199669417.003.0006"
+# urllib.parse.quote(doi)
+
+# acprof : oso/  9780199669417.003.0006 doi
+# acprof%3Aoso%2F9780199669417.003.0006 should
+# acprof%3Aoso/  9780199669417.003.0006 is
+# acprof%3Aoso%2F9780199669417.003.0006
+
+# urllib.parse.quote(doi).split('/', 1)[0] + "/" + urllib.parse.quote(doi).split('/', 1)[1].replace("/","%2F")
+
+# ["DictAddDocs",dct.num_docs, len(dct),dct.num_pos]
+
+# ['DictAddDocs', 114, 39242, 321292]
+# ['DictAddDocs', 949,161672,2655547]
+# ['DictAddDocs', 995, 176872, 2465566] bigram input
+
+# class MyCorpus:
+#     def __iter__(self):
+#         for line in open(CorpusStreamPath, encoding="utf-8"):
+#             # assume there's one document per line, tokens separated by whitespace
+#             yield line.lower().split()
+
+
+
+# class MyCorpus:
+#     def __iter__(self):
+#         for line in open(CorpusStreamPath, encoding="utf-8"):
+#             # assume there's one document per line, tokens separated by whitespace
+#             yield line.lower().split()
+
+
+
+
+# 86             10.1093/jee/49.6.839  1956  False                      Oxford University Press (OUP)  ...  Application Equipment for Granulated Insectici...         3062       en       549
