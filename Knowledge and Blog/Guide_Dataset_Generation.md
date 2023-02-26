@@ -211,10 +211,12 @@ Database dump from unpaywall.org (After filling a form a link is created)
 # 9) Jupyter Notebook
 Up to the creation of the text files based on the scientific publications in pdf format everything is processed with unix commands and libraries. The subsequent textmining and NLP applications have been implement with Python in a Jupyter Notebook. Of course the content of the notebook are further explained in the notebook itself and therefore only the main chapters are explained here shortly for overview purposes:
 
-1. Digital object identifier (DOI) - filepath dictionaries
+[**SciView Jupyter Notebook**](/SciView.ipynb)
+
+1) Preprocess millions of documents
     * In order to access the textfiles the DOI has been chosen as a key to find the corresponding text file. Because the files have been stored in different folders a dictionary is setup with the DOI as keys and the file paths as values.   
-2. Preprocess and model building of millions of documents
+2) Reference dataset transformation and alignment
     * The model building consists of a phrase model, term-frequency dicitonary, bag of words model and the LDA model. All of it is implemented with Gensim and its data streaming capabilities.
-3. Inspect Dictionary and LDA model
+3) Building Phrase Models, Dictionaries, Bow Corpus and LDA Models
     * The resulting LDA model is investigated and knowledge and interesting plots are extracted and created.
 4. ...
