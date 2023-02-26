@@ -56,12 +56,12 @@ The joining or alignment of these two datasets was done based on the digital obj
 The dataset is a single csv file which is currently accessed through dask. In the picture below the head of the SciView dataset is shown with parameters such as doi, year of publishing or the genre of the article. Based on the data_dir and the doi a path to the fulltext content of the article can be generated.
 
 
-<img src="Knowledge and Blog\P0_head.png" width="1200">
-<img src="Knowledge and Blog\P0_sankey.png" width="1200">
+<img src="Knowledge and Blog\P0_head.PNG" width="1200">
+
 
 The tail of the dataset shows the last rows of the last dask dataframe partition (e.g. index of the last partition)
 
-<img src="Knowledge and Blog\P0_tail.png" width="1200">
+<img src="Knowledge and Blog\P0_tail.PNG" width="1200">
 
 # Download of SciView dataset
 
