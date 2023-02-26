@@ -28,19 +28,19 @@ The actual framwork encompasses the following files:
 * scidb
     * A collection of various function enabling the transformation of the downloaded publication data.
 * env_scidb
-    * Path defined which are used in scidb functions
+    * Envrionment paths defined which are used in scidb bash functions
 * SciView.ipynb 
-    * Notebook about NLP workflows
-* env_scidb.py 
+    * Notebook with python based text processing and NLP workflows
+* env_Jupyter.py 
     * Configuration file for generating models and corresponding data
 * test_envrionment.py
     * A bag of test codes and other snippets
 * SciView_env.yaml
-    * 
+    * The configuration file for the python environment in Anaconda
 * Functions
-    * 
+    * Collection of functions utilized in SciView.ipynb
 * Knowledge and Blog
-    * 
+    * Pictures and text files for the blog posts
 
 # SciView Dataset
 
