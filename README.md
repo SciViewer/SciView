@@ -46,7 +46,7 @@ The actual framwork encompasses the following files:
 
 The SciView dataset currently contains **61'892'491** rows, each referecing a scientific article with meta data such as the year of publishing or it's title. Furthermore with the doi and the corresponding directory number the full text content of the article can be accssed by constructing a link to the corresponding file.
 
-This dataset was created through combining a dataset dump of over 138 million entries (see ref_db_files in picture below) of meta data of scholarly scientific articles and data repository of over 87 million full text scientific articles (see compressed_pdf_files in picture below).
+This dataset was created through combining a dataset dump of over 138 million entries  of meta data of scholarly scientific articles (see ref_db_files in picture below) and a data repository of over 87 million full text scientific articles (see compressed_pdf_files in picture below).
 
 The joining or alignment of these two datasets was done based on the digital object identifier (doi). The resulting dataset therefore enables access to over 61 million full text scholarly articles and the corresponding meta data.
 
