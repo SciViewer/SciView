@@ -57,6 +57,7 @@ The dataset is a single csv file which is currently accessed through dask. In th
 
 
 <img src="Knowledge and Blog\P0_head.png" width="1200">
+<img src="Knowledge and Blog\P0_sankey.png" width="1200">
 
 The tail of the dataset shows the last rows of the last dask dataframe partition (e.g. index of the last partition)
 
