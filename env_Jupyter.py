@@ -70,7 +70,7 @@ bigramThreshold=10
 phraseVocabSize=400000000
 
 # Dictionary Parameter
-sampleNDoc=100
+sampleNDoc=1000000
 randomState=1234
 num_rows = 61892491
 dictVocab=60000000
