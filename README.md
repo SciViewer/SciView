@@ -51,7 +51,7 @@ This dataset was created through combining a dataset dump of over 138 million en
 The joining or alignment of these two datasets was done based on the digital object identifier (doi). The resulting dataset therefore enables access to over 61 million full text scholarly articles and the corresponding meta data.
 
 
-<img src="Knowledge and Blog\P0_sankey.png" width="1200">
+<img src="Knowledge and Blog\P0_sankey.png" width="1400">
 
 The dataset is a single csv file which is currently accessed through dask. In the picture below the head of the SciView dataset is shown with parameters such as doi, year of publishing or the genre of the article. Based on the data_dir and the doi a path to the fulltext content of the article can be generated.
 
